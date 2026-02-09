@@ -34,6 +34,9 @@
     "example:quickstart": "tsx examples/quickstart.ts",
     "example:value-investing": "tsx examples/value-investing.ts",
     "example:technical-analysis": "tsx examples/technical-analysis.ts",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
     "prepublishOnly": "npm run build && npm run test"
   },
   "keywords": [
@@ -50,17 +53,18 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "axios": "^1.7.0",
-    "@modelcontextprotocol/sdk": "^1.0.0"
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "axios": "^1.7.0"
   },
   "devDependencies": {
-    "typescript": "^5.4.0",
-    "tsup": "^8.0.0",
-    "vitest": "^1.6.0",
+    "@types/node": "^20.11.0",
     "@vitest/coverage-v8": "^1.6.0",
     "playwright": "^1.45.0",
+    "tsup": "^8.0.0",
     "tsx": "^4.7.0",
-    "@types/node": "^20.11.0"
+    "typescript": "^5.4.0",
+    "vitepress": "^1.6.4",
+    "vitest": "^1.6.0"
   },
   "engines": {
     "node": ">=18.0.0"

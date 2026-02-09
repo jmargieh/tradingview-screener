@@ -9,6 +9,10 @@ pnpm-debug.log*
 dist/
 *.tsbuildinfo
 
+# VitePress
+docs/.vitepress/dist
+docs/.vitepress/cache
+
 # Testing
 coverage/
 .nyc_output/
