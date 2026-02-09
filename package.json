@@ -52,6 +52,14 @@
   ],
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmargieh/tradingview-screener.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jmargieh/tradingview-screener/issues"
+  },
+  "homepage": "https://jmargieh.github.io/tradingview-screener/",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "axios": "^1.7.0"
