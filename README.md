@@ -2,9 +2,9 @@
 
 > Query stocks, crypto, forex, bonds, and futures from TradingView with 13,000+ fields
 
-TypeScript port of the [tvscreener](https://github.com/your-repo) Python library. Full-featured screener API with fluent methods, type safety, and MCP server support.
+TypeScript port of the [tvscreener](https://github.com/deepentropy/tvscreener/) Python library. Full-featured screener API with fluent methods, type safety, and MCP server support.
 
-📚 **[Complete Documentation](docs/README.md)** | 🚀 **[Quick Start](docs/quickstart.md)** | 📖 **[API Reference](docs/api/base-screener.md)**
+📚 **[Complete Documentation](https://jmargieh.github.io/tradingview-screener/)** | 🚀 **[Quick Start](https://jmargieh.github.io/tradingview-screener/quickstart.html)** | 📖 **[API Reference](https://jmargieh.github.io/tradingview-screener/api/base-screener.html)**
 
 ## Features
 
