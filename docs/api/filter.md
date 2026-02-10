@@ -103,11 +103,11 @@ FieldCondition validates that field-to-field comparisons use appropriate operato
 
 ```typescript
 // ✓ Valid: Cross-field comparison with special operator
-StockField.PRICE.above(StockField.MOVING_AVERAGE_50)
+StockField.PRICE.above('Moving Average (50)')
 
 // ✗ Invalid: Direct field-to-field comparison
 try {
-  StockField.PRICE.gt(StockField.VOLUME)  // Error!
+  StockField.PRICE.gt(StockField.PRICE_TO_EARNINGS_RATIO_TTM)  // Error!
 } catch (error) {
   // "Field-to-field comparisons are not supported..."
 }
@@ -309,13 +309,8 @@ WHERE close > 10
 Use `isin()` for OR on same field:
 
 ```typescript
-// Sector is Technology OR Healthcare
-screener.where(StockField.SECTOR.isin(['Technology', 'Healthcare']));
-```
-
-**SQL Equivalent:**
-```sql
-WHERE sector IN ('Technology', 'Healthcare')
+// Description matches multiple patterns
+screener.where(StockField.DESCRIPTION.match('.*(technology|healthcare).*'));
 ```
 
 For OR across different fields, run separate queries and merge:
@@ -359,7 +354,7 @@ try {
 }
 
 // ✓ Valid: Use special operators
-StockField.PRICE.above(StockField.MOVING_AVERAGE_50)
+StockField.PRICE.above('Moving Average (50)')
 ```
 
 ### Value Validation
@@ -428,8 +423,8 @@ screener.where(StockField.PRICE.between(10, 500));
 ```typescript
 // Exclude specific values
 screener
-  .where(StockField.SECTOR.ne('Financial'))
-  .where(StockField.COUNTRY.notIn(['CN', 'RU']))
+  .where(StockField.DESCRIPTION.notMatch('.*financial.*'))
+  .where(StockField.NAME.notMatch('.*(CN|RU).*'))
   .where(StockField.PRICE.gt(5));  // Not penny stocks
 ```
 
@@ -439,7 +434,7 @@ screener
 // Regex patterns
 screener
   .where(StockField.NAME.match('.*bank.*'))
-  .where(StockField.INDUSTRY.notMatch('.*acquisition.*'));
+  .where(StockField.DESCRIPTION.notMatch('.*acquisition.*'));
 ```
 
 ### Technical Filters
@@ -448,8 +443,8 @@ screener
 // Technical indicator filters
 screener
   .where(StockField.RSI.between(30, 70))
-  .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50))
-  .where(StockField.MACD_LEVEL.above(StockField.MACD_SIGNAL));
+  .where(StockField.PRICE.above('Moving Average (50)'))
+  .where(StockField.ATR.gt(2));
 ```
 
 ## Filter Performance
@@ -460,13 +455,13 @@ screener
 // Good: Most restrictive first
 screener
   .where(StockField.MARKET_CAPITALIZATION.gt(100e9))  // Very restrictive
-  .where(StockField.SECTOR.eq('Technology'))          // Moderately restrictive
+  .where(StockField.DESCRIPTION.match('.*technology.*'))  // Moderately restrictive
   .where(StockField.PRICE.gt(10));                    // Less restrictive
 
 // Less efficient: Broad filters first
 screener
   .where(StockField.PRICE.gt(10))                     // Matches many
-  .where(StockField.SECTOR.eq('Technology'))
+  .where(StockField.DESCRIPTION.match('.*technology.*'))
   .where(StockField.MARKET_CAPITALIZATION.gt(100e9));
 ```
 

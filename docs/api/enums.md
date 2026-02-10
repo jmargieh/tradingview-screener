@@ -99,9 +99,9 @@ enum Country {
 ```typescript
 import { Country } from 'tradingview-screener';
 
-screener.where(StockField.COUNTRY.eq(Country.US));
-screener.where(StockField.COUNTRY.isin([Country.US, Country.GB, Country.DE]));
-screener.where(StockField.COUNTRY.notIn([Country.CN, Country.RU]));
+// Note: COUNTRY field is not available as a StockField constant
+// Use raw field name in Filter if needed
+const filter = new Filter('country', FilterOperator.IN, [Country.US, Country.GB]);
 ```
 
 ## Exchange
@@ -132,8 +132,9 @@ enum Exchange {
 ```typescript
 import { Exchange } from 'tradingview-screener';
 
-screener.where(StockField.EXCHANGE.eq(Exchange.NASDAQ));
-screener.where(StockField.EXCHANGE.isin([Exchange.NYSE, Exchange.NASDAQ]));
+// Note: EXCHANGE field is not available as a StockField constant
+// Use raw field name in Filter if needed
+const filter = new Filter('exchange', FilterOperator.IN, [Exchange.NYSE, Exchange.NASDAQ]);
 ```
 
 ## Sector
@@ -160,12 +161,9 @@ enum Sector {
 ```typescript
 import { Sector } from 'tradingview-screener';
 
-screener.where(StockField.SECTOR.eq(Sector.TECHNOLOGY));
-screener.where(StockField.SECTOR.isin([
-  Sector.TECHNOLOGY,
-  Sector.HEALTHCARE,
-  Sector.CONSUMER_CYCLICAL
-]));
+// Note: SECTOR field is not available as a StockField constant
+// Use raw field name in Filter if needed
+const filter = new Filter('sector', FilterOperator.EQUAL, Sector.TECHNOLOGY);
 ```
 
 ## Industry
@@ -203,8 +201,9 @@ enum Industry {
 ```typescript
 import { Industry } from 'tradingview-screener';
 
-screener.where(StockField.INDUSTRY.eq(Industry.SOFTWARE_APPLICATION));
-screener.where(StockField.INDUSTRY.match('.*Software.*'));
+// Note: INDUSTRY field is not available as a StockField constant
+// Use raw field name in Filter if needed
+const filter = new Filter('industry', FilterOperator.EQUAL, Industry.SOFTWARE_APPLICATION);
 ```
 
 ## IndexSymbol
@@ -263,8 +262,9 @@ import { SymbolType } from 'tradingview-screener';
 // Include specific types
 screener.setSymbolTypes([SymbolType.STOCK, SymbolType.DR]);
 
-// Filter by type
-screener.where(StockField.TYPE.eq(SymbolType.STOCK));
+// Note: TYPE field is not available as a StockField constant
+// Use raw field name in Filter if needed
+const filter = new Filter('type', FilterOperator.EQUAL, SymbolType.STOCK);
 ```
 
 ## Rating
@@ -285,11 +285,9 @@ enum Rating {
 ```typescript
 import { Rating } from 'tradingview-screener';
 
-screener.where(StockField.RECOMMENDATION_ANALYST.eq(Rating.STRONG_BUY));
-screener.where(StockField.RECOMMENDATION_ANALYST.isin([
-  Rating.STRONG_BUY,
-  Rating.BUY
-]));
+// Note: RECOMMENDATION_ANALYST field is not available as a StockField constant
+// Use raw field name in Filter if needed
+const filter = new Filter('Recommend.All', FilterOperator.EQUAL, Rating.STRONG_BUY);
 ```
 
 ## Complete Enum Reference
@@ -316,17 +314,18 @@ import {
 // Market selection
 screener.setMarket(Market.AMERICA);
 
-// Country filtering
-screener.where(StockField.COUNTRY.eq(Country.US));
+// Valid StockField constants (21 available):
+// NAME, DESCRIPTION, PRICE, CHANGE, CHANGE_PERCENT, VOLUME,
+// MARKET_CAPITALIZATION, PRICE_TO_EARNINGS_RATIO_TTM, PRICE_EARNINGS_GROWTH_TTM,
+// PRICE_SALES_CURRENT, PRICE_TO_BOOK_MRQ, ENTERPRISE_VALUE_EBITDA_TTM,
+// DIVIDEND_YIELD_FWD, DIVIDENDS_YIELD_FY, DPS_COMMON_STOCK_PRIM_ISSUE_TTM,
+// EARNINGS_PER_SHARE_DILUTED_TTM, REVENUE_TTM, REVENUE_TTM_YOY_GROWTH,
+// NET_INCOME_TTM, RSI, ATR
 
-// Exchange filtering
-screener.where(StockField.EXCHANGE.isin([Exchange.NYSE, Exchange.NASDAQ]));
-
-// Sector filtering
-screener.where(StockField.SECTOR.eq(Sector.TECHNOLOGY));
-
-// Industry filtering
-screener.where(StockField.INDUSTRY.eq(Industry.SOFTWARE_APPLICATION));
+// Example with valid StockField constants
+screener.where(StockField.PRICE.greater(100));
+screener.where(StockField.MARKET_CAPITALIZATION.greater(1000000000));
+screener.where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.inRange(10, 20));
 
 // Index filtering
 screener.setIndex(IndexSymbol.SP500);
@@ -334,8 +333,8 @@ screener.setIndex(IndexSymbol.SP500);
 // Symbol type
 screener.setSymbolTypes([SymbolType.STOCK]);
 
-// Rating filtering
-screener.where(StockField.RECOMMENDATION_ANALYST.eq(Rating.STRONG_BUY));
+// For other fields (country, exchange, sector, industry, rating),
+// use raw field names with Filter class directly
 ```
 
 ## Enum Value Lists
@@ -374,7 +373,26 @@ const hasFinance = Object.values(Sector).includes('Financial');
 
 ## Common Patterns
 
-### Sector Whitelist
+### Using Valid StockField Constants
+
+```typescript
+// Price filtering
+screener.where(StockField.PRICE.greater(100));
+
+// Market cap filtering
+screener.where(StockField.MARKET_CAPITALIZATION.greater(1000000000));
+
+// P/E ratio filtering
+screener.where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.inRange(10, 20));
+
+// Volume filtering
+screener.where(StockField.VOLUME.greater(1000000));
+
+// RSI filtering
+screener.where(StockField.RSI.less(30));
+```
+
+### Sector Whitelist (using raw field name)
 
 ```typescript
 const preferredSectors = [
@@ -383,10 +401,12 @@ const preferredSectors = [
   Sector.CONSUMER_CYCLICAL,
 ];
 
-screener.where(StockField.SECTOR.isin(preferredSectors));
+// Note: Use raw field name since SECTOR is not a valid StockField constant
+const filter = new Filter('sector', FilterOperator.IN, preferredSectors);
+screener.where(filter);
 ```
 
-### Country Blacklist
+### Country Blacklist (using raw field name)
 
 ```typescript
 const excludedCountries = [
@@ -395,10 +415,12 @@ const excludedCountries = [
   Country.BY,
 ];
 
-screener.where(StockField.COUNTRY.notIn(excludedCountries));
+// Note: Use raw field name since COUNTRY is not a valid StockField constant
+const filter = new Filter('country', FilterOperator.NOT_IN, excludedCountries);
+screener.where(filter);
 ```
 
-### Major Exchanges
+### Major Exchanges (using raw field name)
 
 ```typescript
 const majorExchanges = [
@@ -408,10 +430,12 @@ const majorExchanges = [
   Exchange.TSE,
 ];
 
-screener.where(StockField.EXCHANGE.isin(majorExchanges));
+// Note: Use raw field name since EXCHANGE is not a valid StockField constant
+const filter = new Filter('exchange', FilterOperator.IN, majorExchanges);
+screener.where(filter);
 ```
 
-### High-Tech Industries
+### High-Tech Industries (using raw field name)
 
 ```typescript
 const techIndustries = [
@@ -421,7 +445,9 @@ const techIndustries = [
   Industry.HARDWARE,
 ];
 
-screener.where(StockField.INDUSTRY.isin(techIndustries));
+// Note: Use raw field name since INDUSTRY is not a valid StockField constant
+const filter = new Filter('industry', FilterOperator.IN, techIndustries);
+screener.where(filter);
 ```
 
 ## Type Safety
@@ -429,14 +455,19 @@ screener.where(StockField.INDUSTRY.isin(techIndustries));
 ### Compile-Time Checking
 
 ```typescript
-// ✓ Valid: Using enum value
-screener.where(StockField.SECTOR.eq(Sector.TECHNOLOGY));
+// ✓ Valid: Using valid StockField constants
+screener.where(StockField.PRICE.greater(100));
+screener.where(StockField.MARKET_CAPITALIZATION.greater(1000000000));
 
-// ✗ Invalid: Typo caught by TypeScript
-screener.where(StockField.SECTOR.eq('Tecnology'));  // Error!
+// ✗ Invalid: SECTOR is not a valid StockField constant
+// screener.where(StockField.SECTOR.eq(Sector.TECHNOLOGY));  // Error!
 
-// ✓ Valid: Auto-completion available
-screener.where(StockField.SECTOR.eq(Sector.  // IDE shows all sectors
+// ✓ Valid: Use raw field name with Filter for non-StockField fields
+const filter = new Filter('sector', FilterOperator.EQUAL, Sector.TECHNOLOGY);
+screener.where(filter);
+
+// ✓ Valid: Auto-completion available for valid StockFields
+screener.where(StockField.  // IDE shows 21 valid constants
 ```
 
 ### Runtime Validation
@@ -449,7 +480,9 @@ function validateSector(sector: string): sector is Sector {
 // Usage
 const userInput = 'Technology';
 if (validateSector(userInput)) {
-  screener.where(StockField.SECTOR.eq(userInput as Sector));
+  // Use raw field name since SECTOR is not a valid StockField constant
+  const filter = new Filter('sector', FilterOperator.EQUAL, userInput as Sector);
+  screener.where(filter);
 } else {
   console.error('Invalid sector');
 }

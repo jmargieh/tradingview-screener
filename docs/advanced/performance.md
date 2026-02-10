@@ -16,13 +16,13 @@ Apply the most restrictive filters early to reduce dataset size:
 // Good: Most restrictive first
 screener
   .where(StockField.MARKET_CAPITALIZATION.gt(100e9))  // Very restrictive
-  .where(StockField.SECTOR.eq('Technology'))          // Moderately restrictive
+  .where(StockField.VOLUME.gte(1_000_000))            // Moderately restrictive
   .where(StockField.PRICE.gt(10));                    // Less restrictive
 
 // Less efficient
 screener
   .where(StockField.PRICE.gt(10))                     // Matches many stocks
-  .where(StockField.SECTOR.eq('Technology'))
+  .where(StockField.VOLUME.gte(1_000_000))
   .where(StockField.MARKET_CAPITALIZATION.gt(100e9)); // Applied last
 ```
 

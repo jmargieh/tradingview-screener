@@ -77,10 +77,10 @@ StockField.PRICE.lt(500)
 StockField.PRICE.lte(500)
 
 // Equal
-StockField.SECTOR.eq('Technology')
+StockField.NAME.eq('Apple Inc.')
 
 // Not equal
-StockField.SECTOR.ne('Financial')
+StockField.NAME.ne('Tesla Inc.')
 ```
 
 ### Range Comparisons
@@ -96,11 +96,11 @@ StockField.RSI.notBetween(30, 70)  // Overbought or oversold
 ### List Comparisons
 
 ```typescript
-// In list
-StockField.SECTOR.isin(['Technology', 'Healthcare', 'Consumer Cyclical'])
+// In list - using string field
+StockField.NAME.isin(['Apple Inc.', 'Microsoft Corporation', 'Amazon.com Inc.'])
 
-// Not in list
-StockField.COUNTRY.notIn(['CN', 'RU'])
+// Not in list - using description field
+StockField.DESCRIPTION.notIn(['penny stock', 'OTC traded'])
 ```
 
 ### Text Comparisons
@@ -110,17 +110,7 @@ StockField.COUNTRY.notIn(['CN', 'RU'])
 StockField.NAME.match('.*bank.*')
 
 // Not match pattern
-StockField.NAME.notMatch('.*acquisition.*')
-```
-
-### Array Comparisons
-
-```typescript
-// Has any of (for array fields)
-StockField.TAGS.has(['dividend', 'growth'])
-
-// Has none of
-StockField.TAGS.hasNoneOf(['penny', 'otc'])
+StockField.DESCRIPTION.notMatch('.*acquisition.*')
 ```
 
 ## Condition Validation
@@ -132,7 +122,7 @@ Conditions validate that you're not comparing fields directly:
 ```typescript
 // ✗ This throws an error
 try {
-  StockField.PRICE.gt(StockField.MOVING_AVERAGE_200);
+  StockField.PRICE.gt(StockField.VOLUME);
 } catch (error) {
   console.error('Field-to-field comparisons not supported');
 }
@@ -148,11 +138,11 @@ TypeScript ensures type-safe comparisons:
 ```typescript
 // ✓ Valid
 StockField.PRICE.gt(100);           // number to number
-StockField.SECTOR.eq('Technology'); // string to string
+StockField.NAME.eq('Apple Inc.');   // string to string
 
 // ✗ Type errors
 StockField.PRICE.gt('expensive');   // Error: string not assignable to number
-StockField.SECTOR.gt(5);            // Error: number not valid for text field
+StockField.NAME.gt(5);              // Error: number not valid for text field
 ```
 
 ## Converting Conditions to Filters
@@ -223,26 +213,26 @@ screener
 ```typescript
 // Define exclusion criteria
 const notPennyStock = StockField.PRICE.gt(5);
-const notFinancial = StockField.SECTOR.ne('Financial');
-const notChina = StockField.COUNTRY.ne('CN');
+const lowVolatility = StockField.ATR.lt(2);
+const highPE = StockField.PRICE_TO_EARNINGS_RATIO_TTM.lt(50);
 
 screener
   .where(notPennyStock)
-  .where(notFinancial)
-  .where(notChina);
+  .where(lowVolatility)
+  .where(highPE);
 ```
 
 ### Sector Inclusion Pattern
 
 ```typescript
-// Define sector whitelist
-const preferredSectors = StockField.SECTOR.isin([
-  'Technology',
-  'Healthcare',
-  'Consumer Cyclical'
+// Define company name whitelist
+const preferredCompanies = StockField.NAME.isin([
+  'Apple Inc.',
+  'Microsoft Corporation',
+  'Amazon.com Inc.'
 ]);
 
-screener.where(preferredSectors);
+screener.where(preferredCompanies);
 ```
 
 ## Combining Conditions
@@ -261,11 +251,11 @@ screener
 ### Simulating OR with isin()
 
 ```typescript
-// Sector is Tech OR Healthcare (using isin)
-screener.where(StockField.SECTOR.isin(['Technology', 'Healthcare']));
+// Company is Apple OR Microsoft (using isin)
+screener.where(StockField.NAME.isin(['Apple Inc.', 'Microsoft Corporation']));
 
 // Equivalent to:
-// WHERE sector = 'Technology' OR sector = 'Healthcare'
+// WHERE name = 'Apple Inc.' OR name = 'Microsoft Corporation'
 ```
 
 ## Debugging Conditions
@@ -333,12 +323,12 @@ screener2.where(largeCap);
 ```typescript
 // Good: Clear names
 const isProfitable = StockField.NET_INCOME_TTM.gt(0);
-const hasGoodLiquidity = StockField.CURRENT_RATIO_MRQ.gt(1.5);
+const hasHighDividend = StockField.DIVIDEND_YIELD_FWD.gt(3);
 const isLargeCap = StockField.MARKET_CAPITALIZATION.gt(10e9);
 
 // Avoid: Unclear names
 const condition1 = StockField.NET_INCOME_TTM.gt(0);
-const c2 = StockField.CURRENT_RATIO_MRQ.gt(1.5);
+const c2 = StockField.DIVIDEND_YIELD_FWD.gt(3);
 ```
 
 ### 3. Validate Inputs
@@ -367,13 +357,13 @@ const lowPB = StockField.PRICE_TO_BOOK_MRQ.lt(3);
 
 // Quality conditions
 const profitable = StockField.NET_INCOME_TTM.gt(0);
-const goodMargins = StockField.OPERATING_MARGIN_TTM.gt(15);
+const growingRevenue = StockField.REVENUE_TTM_YOY_GROWTH.gt(10);
 
 screener
   .where(lowPE)
   .where(lowPB)
   .where(profitable)
-  .where(goodMargins);
+  .where(growingRevenue);
 ```
 
 ## Common Pitfalls

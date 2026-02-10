@@ -384,8 +384,8 @@ StockField.PRICE.gt(100);      // ✓ Valid
 StockField.PRICE.gt('high');   // ✗ TypeScript error
 
 // Enum usage is type-safe
-screener.where(StockField.SECTOR.eq(Sector.TECHNOLOGY));  // ✓
-screener.where(StockField.SECTOR.eq('Tech'));             // ✗ Error
+screener.where(StockField.PRICE.gte(50));                 // ✓
+screener.where(StockField.PRICE.gte('high'));             // ✗ Error
 ```
 
 ## Error Handling

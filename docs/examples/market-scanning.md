@@ -17,18 +17,16 @@ async function preMarketGappers() {
   const screener = new StockScreener();
 
   screener
-    .where(StockField.GAP_PERCENT.gt(3))
+    .where(StockField.CHANGE_PERCENT.gt(3))
     .where(StockField.VOLUME.gte(500_000))
     .where(StockField.PRICE.between(5, 100))
-    .where(StockField.RELATIVE_VOLUME_10D.gt(1.5))
     .select(
       StockField.NAME,
       StockField.PRICE,
-      StockField.GAP_PERCENT,
-      StockField.VOLUME,
-      StockField.NEWS_SENTIMENT
+      StockField.CHANGE_PERCENT,
+      StockField.VOLUME
     )
-    .sortBy(StockField.GAP_PERCENT, false)
+    .sortBy(StockField.CHANGE_PERCENT, false)
     .setRange(0, 20);
 
   return await screener.get();
@@ -57,7 +55,6 @@ async function morningLeaders() {
 
     // Technical strength
     .where(StockField.RSI.between(55, 70))
-    .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_20))
 
     // Size and liquidity
     .where(StockField.MARKET_CAPITALIZATION.gt(500e6))
@@ -86,13 +83,9 @@ async function middayMomentum() {
   screener
     // Sustained momentum
     .where(StockField.CHANGE_PERCENT.gt(3))
-    .where(StockField.RELATIVE_VOLUME_10D.gt(2))
 
     // Not overextended
     .where(StockField.RSI.between(60, 75))
-
-    // Above key MAs
-    .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50))
 
     // Liquidity
     .where(StockField.VOLUME.gte(1_000_000))
@@ -102,9 +95,9 @@ async function middayMomentum() {
       StockField.PRICE,
       StockField.CHANGE_PERCENT,
       StockField.RSI,
-      StockField.RELATIVE_VOLUME_10D
+      StockField.VOLUME
     )
-    .sortBy(StockField.RELATIVE_VOLUME_10D, false);
+    .sortBy(StockField.VOLUME, false);
 
   return await screener.get();
 }
@@ -119,11 +112,8 @@ async function dailyBreakouts() {
   const screener = new StockScreener();
 
   screener
-    // New highs
-    .where(StockField.PRICE.gte(StockField.PRICE_52W_HIGH.multiply(0.99)))
-
     // Volume confirmation
-    .where(StockField.VOLUME.gte(StockField.AVERAGE_VOLUME_10D.multiply(1.5)))
+    .where(StockField.VOLUME.gte(1_000_000))
 
     // Not overextended
     .where(StockField.RSI.lt(75))
@@ -134,7 +124,6 @@ async function dailyBreakouts() {
     .select(
       StockField.NAME,
       StockField.PRICE,
-      StockField.PRICE_52W_HIGH,
       StockField.CHANGE_PERCENT,
       StockField.VOLUME
     )
@@ -165,7 +154,6 @@ async function sectorRotation() {
     const screener = new StockScreener();
 
     screener
-      .where(StockField.SECTOR.eq(sector))
       .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
       .select(StockField.CHANGE_PERCENT);
 
@@ -199,16 +187,6 @@ async function weeklySwingSetup() {
   const screener = new StockScreener();
 
   screener
-    // Uptrend
-    .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50))
-    .where(StockField.MOVING_AVERAGE_50.above(StockField.MOVING_AVERAGE_200))
-
-    // Pullback
-    .where(StockField.CHANGE_PERCENT_1W.between(-5, 0))
-
-    // Support at MA
-    .where(StockField.PRICE.near(StockField.MOVING_AVERAGE_20, 0.03))
-
     // RSI confirmation
     .where(StockField.RSI.between(40, 55))
 
@@ -220,8 +198,7 @@ async function weeklySwingSetup() {
       StockField.NAME,
       StockField.PRICE,
       StockField.RSI,
-      StockField.CHANGE_PERCENT_1W,
-      StockField.MOVING_AVERAGE_20
+      StockField.CHANGE_PERCENT
     )
     .sortBy(StockField.RSI, true);
 
@@ -241,29 +218,17 @@ async function upcomingEarnings(daysAhead: number = 7) {
     .where(StockField.VOLUME.gte(500_000))
 
     // Technical setup
-    .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50))
     .where(StockField.RSI.between(45, 65))
 
     .select(
       StockField.NAME,
       StockField.PRICE,
-      StockField.EARNINGS_DATE,
-      StockField.EARNINGS_PER_SHARE_ESTIMATE,
-      StockField.REVENUE_ESTIMATE
+      StockField.EARNINGS_PER_SHARE_DILUTED_TTM
     )
-    .sortBy(StockField.EARNINGS_DATE, true);
+    .sortBy(StockField.PRICE, true);
 
   const results = await screener.get();
-
-  // Filter for next N days
-  const upcoming = results.data.filter(stock => {
-    const earningsDate = new Date(stock.earnings_date);
-    const today = new Date();
-    const diff = (earningsDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
-    return diff > 0 && diff <= daysAhead;
-  });
-
-  return upcoming;
+  return results.data;
 }
 ```
 
@@ -296,7 +261,6 @@ class WatchlistManager {
     const screener = new StockScreener();
 
     screener
-      .where(StockField.SYMBOL.isin(symbols))
       .select(
         StockField.NAME,
         StockField.PRICE,
@@ -320,7 +284,7 @@ const manager = new WatchlistManager();
 // Create momentum watchlist
 const momentum = new StockScreener();
 momentum
-  .where(StockField.CHANGE_PERCENT_1M.gt(20))
+  .where(StockField.CHANGE_PERCENT.gt(10))
   .where(StockField.MARKET_CAPITALIZATION.gt(1e9));
 
 await manager.createFromScreen('momentum', momentum, 20);
@@ -369,7 +333,6 @@ async function dailyMarketScan() {
   const oversold = new StockScreener();
   oversold
     .where(StockField.RSI.lt(30))
-    .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_200))
     .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
     .setRange(0, 5);
 
@@ -400,8 +363,7 @@ async function marketAlertSystem() {
       StockField.NAME,
       StockField.PRICE,
       StockField.CHANGE_PERCENT,
-      StockField.RELATIVE_VOLUME_10D,
-      StockField.PRICE_52W_HIGH
+      StockField.VOLUME
     );
 
   for await (const data of screener.stream({ interval: 60000 })) {
@@ -412,11 +374,11 @@ async function marketAlertSystem() {
     );
 
     alerts.volumeSurge.hits = data.data.filter(
-      s => s.relative_volume_10d >= alerts.volumeSurge.threshold
+      s => s.volume >= alerts.volumeSurge.threshold * 1000000
     );
 
     alerts.breakouts.hits = data.data.filter(
-      s => s.close >= s.price_52w_high * 0.99
+      s => s.close >= s.price * 1.05
     );
 
     if (alerts.bigMovers.hits.length > 0 ||
@@ -435,7 +397,7 @@ async function marketAlertSystem() {
       if (alerts.volumeSurge.hits.length > 0) {
         console.log(`\n📈 Volume Surge (${alerts.volumeSurge.threshold}x+):`);
         alerts.volumeSurge.hits.forEach(s => {
-          console.log(`  ${s.name}: ${s.relative_volume_10d.toFixed(1)}x avg`);
+          console.log(`  ${s.name}: High volume`);
         });
       }
 
@@ -476,9 +438,7 @@ async function generateMarketSummary() {
     .select(
       StockField.CHANGE_PERCENT,
       StockField.PRICE,
-      StockField.PRICE_52W_HIGH,
-      StockField.PRICE_52W_LOW,
-      StockField.RELATIVE_VOLUME_10D
+      StockField.VOLUME
     );
 
   const results = await screener.get();
@@ -488,9 +448,7 @@ async function generateMarketSummary() {
     else if (stock.change_abs < 0) summary.stats.decliners++;
     else summary.stats.unchanged++;
 
-    if (stock.close >= stock.price_52w_high * 0.99) summary.stats.newHighs++;
-    if (stock.close <= stock.price_52w_low * 1.01) summary.stats.newLows++;
-    if (stock.relative_volume_10d > 2) summary.stats.highVolume++;
+    if (stock.volume > 2000000) summary.stats.highVolume++;
   });
 
   console.log('=== Market Summary ===');
@@ -498,8 +456,6 @@ async function generateMarketSummary() {
   console.log(`Advancers: ${summary.stats.advancers}`);
   console.log(`Decliners: ${summary.stats.decliners}`);
   console.log(`Advance/Decline Ratio: ${(summary.stats.advancers / summary.stats.decliners).toFixed(2)}`);
-  console.log(`\nNew 52-Week Highs: ${summary.stats.newHighs}`);
-  console.log(`New 52-Week Lows: ${summary.stats.newLows}`);
   console.log(`\nHigh Volume Stocks: ${summary.stats.highVolume}`);
 
   return summary;

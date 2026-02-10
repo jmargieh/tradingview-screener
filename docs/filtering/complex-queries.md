@@ -28,16 +28,6 @@ screener
 
 ### Simulating OR Logic
 
-Use `isin()` for OR conditions on the same field:
-
-```typescript
-// Sector is Tech OR Healthcare
-screener.where(StockField.SECTOR.isin(['Technology', 'Healthcare']));
-
-// Country is US OR CA OR GB
-screener.where(StockField.COUNTRY.isin(['US', 'CA', 'GB']));
-```
-
 For OR across different fields, run separate queries and merge:
 
 ```typescript
@@ -68,12 +58,8 @@ screener
   // Income: Good dividend yield
   .where(StockField.DIVIDEND_YIELD_FWD.gte(2))
 
-  // Quality: Profitable with low debt
+  // Quality: Profitable
   .where(StockField.NET_INCOME_TTM.gt(0))
-  .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(1))
-
-  // Liquidity: Current ratio > 1.5
-  .where(StockField.CURRENT_RATIO_MRQ.gt(1.5))
 
   // Size: Established companies
   .where(StockField.MARKET_CAPITALIZATION.gte(1e9))
@@ -97,31 +83,22 @@ const results = await screener.get();
 const screener = new StockScreener();
 
 screener
-  // Growth: Strong revenue and earnings growth
-  .where(StockField.REVENUE_GROWTH_TTM.gt(20))
-  .where(StockField.EARNINGS_GROWTH_TTM.gt(15))
-
-  // Profitability: Good margins
-  .where(StockField.OPERATING_MARGIN_TTM.gt(15))
-  .where(StockField.NET_MARGIN_TTM.gt(10))
-
-  // Efficiency: High ROE
-  .where(StockField.RETURN_ON_EQUITY_TTM.gt(15))
+  // Growth: Strong revenue growth
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(20))
 
   // Size: Mid-cap growth
   .where(StockField.MARKET_CAPITALIZATION.between(1e9, 50e9))
 
   // Valuation: Reasonable PEG ratio
-  .where(StockField.PRICE_TO_EARNINGS_GROWTH_RATIO_TTM.lt(2))
+  .where(StockField.PRICE_EARNINGS_GROWTH_TTM.lt(2))
 
   .select(
     StockField.NAME,
-    StockField.REVENUE_GROWTH_TTM,
-    StockField.EARNINGS_GROWTH_TTM,
-    StockField.OPERATING_MARGIN_TTM,
-    StockField.RETURN_ON_EQUITY_TTM
+    StockField.REVENUE_TTM_YOY_GROWTH,
+    StockField.PRICE_EARNINGS_GROWTH_TTM,
+    StockField.MARKET_CAPITALIZATION
   )
-  .sortBy(StockField.REVENUE_GROWTH_TTM, false);
+  .sortBy(StockField.REVENUE_TTM_YOY_GROWTH, false);
 ```
 
 ## Technical Momentum Screen
@@ -138,9 +115,6 @@ screener
 
   // Volume: Above average
   .where(StockField.VOLUME.gte(500_000))
-
-  // Trend: Price above MA
-  .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50))
 
   // Volatility: ATR not too high
   .where(StockField.ATR.lt(10))
@@ -168,18 +142,8 @@ screener
   // Dividend: High yield but not too high (sustainable)
   .where(StockField.DIVIDEND_YIELD_FWD.between(3, 8))
 
-  // Safety: Low payout ratio
-  .where(StockField.DIVIDEND_PAYOUT_RATIO_TTM.lte(60))
-
-  // Growth: Growing dividends
-  .where(StockField.DIVIDEND_GROWTH_RATE_5Y.gt(5))
-
   // Quality: Profitable
   .where(StockField.NET_INCOME_TTM.gt(0))
-
-  // Financial Health: Good ratios
-  .where(StockField.CURRENT_RATIO_MRQ.gt(1.2))
-  .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(1.5))
 
   // Size: Established companies
   .where(StockField.MARKET_CAPITALIZATION.gte(5e9))
@@ -187,8 +151,8 @@ screener
   .select(
     StockField.NAME,
     StockField.DIVIDEND_YIELD_FWD,
-    StockField.DIVIDEND_PAYOUT_RATIO_TTM,
-    StockField.DIVIDEND_GROWTH_RATE_5Y
+    StockField.DPS_COMMON_STOCK_PRIM_ISSUE_TTM,
+    StockField.NET_INCOME_TTM
   )
   .sortBy(StockField.DIVIDEND_YIELD_FWD, false);
 ```
@@ -199,9 +163,7 @@ screener
 
 ```typescript
 screener
-  .where(StockField.SECTOR.eq('Technology'))
-  .where(StockField.REVENUE_GROWTH_TTM.gt(25))
-  .where(StockField.OPERATING_MARGIN_TTM.gt(20))
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(25))
   .where(StockField.MARKET_CAPITALIZATION.between(1e9, 100e9));
 ```
 
@@ -209,8 +171,6 @@ screener
 
 ```typescript
 screener
-  .where(StockField.SECTOR.eq('Financial'))
-  .where(StockField.RETURN_ON_EQUITY_TTM.gt(12))
   .where(StockField.PRICE_TO_BOOK_MRQ.lt(1.5))
   .where(StockField.DIVIDEND_YIELD_FWD.gte(3));
 ```
@@ -221,17 +181,12 @@ screener
 
 ```typescript
 screener
-  // Quality metrics
-  .where(StockField.RETURN_ON_EQUITY_TTM.gt(15))
-  .where(StockField.OPERATING_MARGIN_TTM.gt(15))
-  .where(StockField.CURRENT_RATIO_MRQ.gt(1.5))
-
   // Reasonable price
   .where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.between(10, 20))
-  .where(StockField.PRICE_TO_EARNINGS_GROWTH_RATIO_TTM.lt(1.5))
+  .where(StockField.PRICE_EARNINGS_GROWTH_TTM.lt(1.5))
 
   // Growth
-  .where(StockField.EARNINGS_GROWTH_TTM.gt(10))
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(10))
 
   // Size
   .where(StockField.MARKET_CAPITALIZATION.gte(2e9));
@@ -274,13 +229,7 @@ class ScreenerPatterns {
   static profitable(): StockScreener {
     return new StockScreener()
       .where(StockField.NET_INCOME_TTM.gt(0))
-      .where(StockField.OPERATING_MARGIN_TTM.gt(0));
-  }
-
-  static liquid(): StockScreener {
-    return new StockScreener()
-      .where(StockField.CURRENT_RATIO_MRQ.gt(1.5))
-      .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(1));
+      .where(StockField.EARNINGS_PER_SHARE_DILUTED_TTM.gt(0));
   }
 }
 
@@ -324,13 +273,13 @@ async function getAllResults(screener: StockScreener) {
 // Good: Most restrictive first
 screener
   .where(StockField.MARKET_CAPITALIZATION.gt(100e9))  // Very restrictive
-  .where(StockField.SECTOR.eq('Technology'))          // Moderately restrictive
+  .where(StockField.VOLUME.gte(1_000_000))            // Moderately restrictive
   .where(StockField.PRICE.gt(10));                    // Less restrictive
 
 // Works but less efficient
 screener
   .where(StockField.PRICE.gt(10))                     // Least restrictive
-  .where(StockField.SECTOR.eq('Technology'))
+  .where(StockField.VOLUME.gte(1_000_000))
   .where(StockField.MARKET_CAPITALIZATION.gt(100e9));
 ```
 

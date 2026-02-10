@@ -42,7 +42,7 @@ StockField.DIVIDEND_YIELD_FWD.gte(3)
 ```typescript
 screener
   .where(StockField.DIVIDEND_YIELD_FWD.gte(3))
-  .where(StockField.ANALYST_RECOMMENDATION.gte(3)); // 3 = Buy or better
+  .where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.lte(20)); // Reasonable valuation
 ```
 
 ### Less Than (`lt`)
@@ -61,7 +61,7 @@ StockField.PRICE_TO_EARNINGS_RATIO_TTM.lt(15)
 screener
   .where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.lt(15))
   .where(StockField.ATR.lt(5)) // Low volatility
-  .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(0.5));
+  .where(StockField.PRICE_TO_BOOK_MRQ.lt(2));
 ```
 
 ### Less Than or Equal (`lte`)
@@ -80,44 +80,44 @@ StockField.PRICE.lte(500)
 screener
   .where(StockField.PRICE.lte(500))
   .where(StockField.PRICE_TO_BOOK_MRQ.lte(3))
-  .where(StockField.DIVIDEND_PAYOUT_RATIO_TTM.lte(70));
+  .where(StockField.DIVIDEND_YIELD_FWD.lte(8));
 ```
 
 ### Equal (`eq`)
 
 ```typescript
-StockField.SECTOR.eq('Technology')
-// SQL equivalent: WHERE sector = 'Technology'
+StockField.NAME.eq('Apple Inc.')
+// SQL equivalent: WHERE name = 'Apple Inc.'
 ```
 
 **Use cases:**
 - Exact matches
-- Specific sectors/industries
-- Binary flags
+- Specific company names
+- Specific values
 
 ```typescript
 screener
-  .where(StockField.SECTOR.eq('Technology'))
-  .where(StockField.COUNTRY.eq('US'))
-  .where(StockField.EXCHANGE.eq('NASDAQ'));
+  .where(StockField.NAME.eq('Apple Inc.'))
+  .where(StockField.PRICE.eq(150))
+  .where(StockField.VOLUME.gt(1_000_000));
 ```
 
 ### Not Equal (`ne`)
 
 ```typescript
-StockField.SECTOR.ne('Financial')
-// SQL equivalent: WHERE sector != 'Financial'
+StockField.PRICE.ne(0)
+// SQL equivalent: WHERE price != 0
 ```
 
 **Use cases:**
-- Exclude sectors
 - Exclude specific values
-- Filter out nulls
+- Filter out zeros
+- Exclude nulls
 
 ```typescript
 screener
-  .where(StockField.SECTOR.ne('Financial'))
-  .where(StockField.COUNTRY.ne('CN')); // Exclude China
+  .where(StockField.PRICE.ne(0))
+  .where(StockField.VOLUME.ne(0)); // Exclude inactive stocks
 ```
 
 ## Range Operators
@@ -171,51 +171,43 @@ screener
 ### In List (`isin`)
 
 ```typescript
-StockField.SECTOR.isin(['Technology', 'Healthcare', 'Consumer Cyclical'])
-// SQL equivalent: WHERE sector IN ('Technology', 'Healthcare', 'Consumer Cyclical')
+StockField.PRICE.isin([50, 100, 150, 200])
+// SQL equivalent: WHERE price IN (50, 100, 150, 200)
 ```
 
 **Use cases:**
-- Multiple sectors
-- Multiple countries
+- Multiple specific values
+- Discrete price points
 - Whitelist of values
 
 ```typescript
 screener
-  // Tech, Healthcare, or Consumer
-  .where(StockField.SECTOR.isin([
-    'Technology',
-    'Healthcare',
-    'Consumer Cyclical'
-  ]))
-  // US, Canada, or UK
-  .where(StockField.COUNTRY.isin(['US', 'CA', 'GB']))
-  // Specific exchanges
-  .where(StockField.EXCHANGE.isin(['NASDAQ', 'NYSE']));
+  // Specific price points
+  .where(StockField.PRICE.isin([50, 100, 150, 200]))
+  // Multiple P/E ratios
+  .where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.isin([10, 15, 20]))
+  // Multiple RSI values
+  .where(StockField.RSI.isin([30, 50, 70]));
 ```
 
 ### Not In List (`notIn`)
 
 ```typescript
-StockField.SECTOR.notIn(['Financial', 'Real Estate'])
-// SQL equivalent: WHERE sector NOT IN ('Financial', 'Real Estate')
+StockField.PRICE.notIn([0, 999999])
+// SQL equivalent: WHERE price NOT IN (0, 999999)
 ```
 
 **Use cases:**
-- Exclude sectors
+- Exclude specific values
 - Blacklist values
-- Filter out multiple values
+- Filter out outliers
 
 ```typescript
 screener
-  // Exclude cyclical sectors
-  .where(StockField.SECTOR.notIn([
-    'Financial',
-    'Real Estate',
-    'Utilities'
-  ]))
-  // Exclude certain countries
-  .where(StockField.COUNTRY.notIn(['CN', 'RU']));
+  // Exclude extreme prices
+  .where(StockField.PRICE.notIn([0, 999999]))
+  // Exclude certain P/E ratios
+  .where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.notIn([0, -1]));
 ```
 
 ## Text Operators
@@ -262,35 +254,35 @@ screener
 ### Has (Contains Any) (`has`)
 
 ```typescript
-StockField.TAGS.has(['dividend', 'value'])
+StockField.NAME.has(['Apple', 'Microsoft'])
 // Has at least one of the values
 ```
 
 **Use cases:**
-- Tag filtering
-- Category matching
-- Multi-value fields
+- Name matching
+- Keyword filtering
+- Multi-value matching
 
 ```typescript
 screener
-  .where(StockField.TAGS.has(['dividend', 'growth']))
-  .where(StockField.CATEGORIES.has(['ESG', 'sustainable']));
+  .where(StockField.NAME.has(['Apple', 'Microsoft']))
+  .where(StockField.DESCRIPTION.has(['technology', 'software']));
 ```
 
 ### Has None Of (`hasNoneOf`)
 
 ```typescript
-StockField.TAGS.hasNoneOf(['speculative', 'penny'])
-// SQL equivalent: none of the tags match
+StockField.NAME.hasNoneOf(['Acquisition', 'SPAC'])
+// SQL equivalent: none of the values match
 ```
 
 **Use cases:**
-- Exclude tags
-- Filter out categories
+- Exclude keywords
+- Filter out specific terms
 
 ```typescript
 screener
-  .where(StockField.TAGS.hasNoneOf(['penny', 'otc', 'delisted']));
+  .where(StockField.NAME.hasNoneOf(['Acquisition', 'SPAC', 'Holdings']));
 ```
 
 ## Technical Analysis Operators
@@ -298,8 +290,8 @@ screener
 ### Above (`above`)
 
 ```typescript
-StockField.PRICE.above(StockField.MOVING_AVERAGE_200)
-// Price above 200-day MA
+StockField.PRICE.above(StockField.PRICE_TO_BOOK_MRQ)
+// Price above P/B ratio (example field-to-field comparison)
 ```
 
 **Note:** Field-to-field comparisons may not be supported by all operators.
@@ -307,29 +299,29 @@ StockField.PRICE.above(StockField.MOVING_AVERAGE_200)
 ### Below (`below`)
 
 ```typescript
-StockField.PRICE.below(StockField.MOVING_AVERAGE_50)
-// Price below 50-day MA
+StockField.PRICE_TO_EARNINGS_RATIO_TTM.below(StockField.PRICE_TO_BOOK_MRQ)
+// P/E below P/B (example field-to-field comparison)
 ```
 
 ### Crosses (`crosses`)
 
 ```typescript
-StockField.PRICE.crosses(StockField.MOVING_AVERAGE_50)
-// Price recently crossed MA
+StockField.RSI.crosses(50)
+// RSI recently crossed the 50 level
 ```
 
 ### Crosses Above (`crossesAbove`)
 
 ```typescript
-StockField.PRICE.crossesAbove(StockField.MOVING_AVERAGE_50)
-// Price crossed above MA (golden cross when MA is 200)
+StockField.RSI.crossesAbove(30)
+// RSI crossed above 30 (oversold recovery)
 ```
 
 ### Crosses Below (`crossesBelow`)
 
 ```typescript
-StockField.PRICE.crossesBelow(StockField.MOVING_AVERAGE_200)
-// Price crossed below MA (death cross)
+StockField.RSI.crossesBelow(70)
+// RSI crossed below 70 (overbought correction)
 ```
 
 ## Combining Operators
@@ -360,13 +352,13 @@ For OR conditions, use `isin()` or multiple queries:
 
 ```typescript
 // Option 1: Use isin for OR on same field
-screener.where(StockField.SECTOR.isin(['Technology', 'Healthcare']));
-// sector = 'Technology' OR sector = 'Healthcare'
+screener.where(StockField.PRICE.isin([50, 100, 150]));
+// price = 50 OR price = 100 OR price = 150
 
 // Option 2: Run separate queries and merge
-const tech = await screener1.where(StockField.SECTOR.eq('Technology')).get();
-const health = await screener2.where(StockField.SECTOR.eq('Healthcare')).get();
-const combined = [...tech.data, ...health.data];
+const lowPE = await screener1.where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.lt(10)).get();
+const highDiv = await screener2.where(StockField.DIVIDEND_YIELD_FWD.gt(5)).get();
+const combined = [...lowPE.data, ...highDiv.data];
 ```
 
 ### Complex Conditions
@@ -385,7 +377,7 @@ screener
 
   // Quality: profitable with positive growth
   .where(StockField.NET_INCOME_TTM.gt(0))
-  .where(StockField.REVENUE_GROWTH_TTM.gt(0));
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(0));
 ```
 
 ## Operator Precedence
@@ -396,7 +388,7 @@ All conditions are evaluated with AND logic. Order doesn't affect results but ca
 // Recommended order: most restrictive first
 screener
   .where(StockField.MARKET_CAPITALIZATION.gt(10e9))    // Most restrictive
-  .where(StockField.SECTOR.eq('Technology'))            // Medium
+  .where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.lt(20)) // Medium
   .where(StockField.PRICE.gt(10));                      // Least restrictive
 ```
 
@@ -409,18 +401,18 @@ screener
   .where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.between(5, 15))
   .where(StockField.PRICE_TO_BOOK_MRQ.lt(3))
   .where(StockField.DIVIDEND_YIELD_FWD.gte(2))
-  .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(1))
-  .where(StockField.CURRENT_RATIO_MRQ.gt(1.5));
+  .where(StockField.PRICE_SALES_CURRENT.lt(2))
+  .where(StockField.NET_INCOME_TTM.gt(0));
 ```
 
 ### Growth Investing Screen
 
 ```typescript
 screener
-  .where(StockField.REVENUE_GROWTH_TTM.gt(20))
-  .where(StockField.EARNINGS_GROWTH_TTM.gt(15))
-  .where(StockField.OPERATING_MARGIN_TTM.gt(15))
-  .where(StockField.RETURN_ON_EQUITY_TTM.gt(15));
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(20))
+  .where(StockField.EARNINGS_PER_SHARE_DILUTED_TTM.gt(0))
+  .where(StockField.NET_INCOME_TTM.gt(0))
+  .where(StockField.PRICE_EARNINGS_GROWTH_TTM.lt(1.5));
 ```
 
 ### Momentum Trading Screen
@@ -429,8 +421,8 @@ screener
 screener
   .where(StockField.RSI.between(50, 70))
   .where(StockField.CHANGE_PERCENT.gt(2))
-  .where(StockField.VOLUME.gte(StockField.AVERAGE_VOLUME_30D * 1.5))
-  .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50));
+  .where(StockField.VOLUME.gt(1_000_000))
+  .where(StockField.ATR.gt(2));
 ```
 
 ### Quality Dividend Screen
@@ -438,10 +430,10 @@ screener
 ```typescript
 screener
   .where(StockField.DIVIDEND_YIELD_FWD.between(3, 8))
-  .where(StockField.DIVIDEND_PAYOUT_RATIO_TTM.lte(60))
-  .where(StockField.DIVIDEND_GROWTH_RATE_5Y.gt(5))
-  .where(StockField.CURRENT_RATIO_MRQ.gt(1.2))
-  .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(1.5));
+  .where(StockField.DIVIDENDS_YIELD_FY.gte(2.5))
+  .where(StockField.DPS_COMMON_STOCK_PRIM_ISSUE_TTM.gt(0))
+  .where(StockField.PRICE_TO_BOOK_MRQ.lt(3))
+  .where(StockField.NET_INCOME_TTM.gt(0));
 ```
 
 ## Error Handling
@@ -451,7 +443,7 @@ screener
 ```typescript
 // ❌ Field-to-field comparison (not supported)
 try {
-  StockField.PRICE.gt(StockField.MOVING_AVERAGE_200);
+  StockField.PRICE.gt(StockField.PRICE_TO_BOOK_MRQ);
 } catch (error) {
   console.error('Field-to-field comparisons not supported');
 }
@@ -468,7 +460,7 @@ StockField.PRICE.eq('expensive'); // Error: expects number
 
 // ✓ Correct type
 StockField.PRICE.gt(100);
-StockField.SECTOR.eq('Technology');
+StockField.NAME.eq('Apple Inc.');
 ```
 
 ## Performance Tips

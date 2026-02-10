@@ -18,12 +18,12 @@ const screener = new StockScreener();
 screener
   .where(StockField.DIVIDEND_YIELD_FWD.gte(4))
   .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
-  .where(StockField.DIVIDEND_PAYOUT_RATIO_TTM.lte(70))  // Sustainable
   .select(
     StockField.NAME,
     StockField.PRICE,
     StockField.DIVIDEND_YIELD_FWD,
-    StockField.DIVIDEND_PAYOUT_RATIO_TTM
+    StockField.DPS_COMMON_STOCK_PRIM_ISSUE_TTM,
+    StockField.MARKET_CAPITALIZATION
   )
   .sortBy(StockField.DIVIDEND_YIELD_FWD, false);
 
@@ -31,42 +31,33 @@ const results = await screener.get();
 console.table(results.data);
 ```
 
-## Dividend Aristocrats
+## Quality Dividend Stocks
 
-Companies with long dividend growth history:
+Companies with strong dividend yields and quality metrics:
 
 ```typescript
-async function dividendAristocrats() {
+async function qualityDividendStocks() {
   const screener = new StockScreener();
 
   screener
     // Strong yield
     .where(StockField.DIVIDEND_YIELD_FWD.gte(2.5))
 
-    // Consistent growth
-    .where(StockField.DIVIDEND_GROWTH_RATE_5Y.gt(5))
-
-    // Sustainable payout
-    .where(StockField.DIVIDEND_PAYOUT_RATIO_TTM.between(30, 65))
-
-    // Financial strength
-    .where(StockField.CURRENT_RATIO_MRQ.gt(1.5))
-    .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(1))
-
     // Profitability
     .where(StockField.NET_INCOME_TTM.gt(0))
-    .where(StockField.RETURN_ON_EQUITY_TTM.gt(12))
+    .where(StockField.EARNINGS_PER_SHARE_DILUTED_TTM.gt(0))
 
-    // Size
+    // Size and liquidity
     .where(StockField.MARKET_CAPITALIZATION.gt(5e9))
+    .where(StockField.VOLUME.gt(500000))
 
     .select(
       StockField.NAME,
       StockField.PRICE,
       StockField.DIVIDEND_YIELD_FWD,
-      StockField.DIVIDEND_GROWTH_RATE_5Y,
-      StockField.DIVIDEND_PAYOUT_RATIO_TTM,
-      StockField.CURRENT_RATIO_MRQ
+      StockField.DPS_COMMON_STOCK_PRIM_ISSUE_TTM,
+      StockField.EARNINGS_PER_SHARE_DILUTED_TTM,
+      StockField.MARKET_CAPITALIZATION
     )
     .sortBy(StockField.DIVIDEND_YIELD_FWD, false);
 
@@ -76,21 +67,22 @@ async function dividendAristocrats() {
 
 ## Dividend Growth
 
-### High Growth Dividends
+### High Yield with Growth Potential
 
 ```typescript
 screener
   .where(StockField.DIVIDEND_YIELD_FWD.gte(2))
-  .where(StockField.DIVIDEND_GROWTH_RATE_5Y.gt(10))
-  .where(StockField.DIVIDEND_PAYOUT_RATIO_TTM.lt(60))
-  .where(StockField.EARNINGS_GROWTH_TTM.gt(5))
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(5))
+  .where(StockField.EARNINGS_PER_SHARE_DILUTED_TTM.gt(0))
+  .where(StockField.NET_INCOME_TTM.gt(0))
   .select(
     StockField.NAME,
     StockField.DIVIDEND_YIELD_FWD,
-    StockField.DIVIDEND_GROWTH_RATE_5Y,
-    StockField.DIVIDEND_PAYOUT_RATIO_TTM
+    StockField.DPS_COMMON_STOCK_PRIM_ISSUE_TTM,
+    StockField.REVENUE_TTM_YOY_GROWTH,
+    StockField.EARNINGS_PER_SHARE_DILUTED_TTM
   )
-  .sortBy(StockField.DIVIDEND_GROWTH_RATE_5Y, false);
+  .sortBy(StockField.REVENUE_TTM_YOY_GROWTH, false);
 ```
 
 ## Safe Dividends
@@ -105,28 +97,23 @@ async function safeDividendScreen() {
     // Attractive yield
     .where(StockField.DIVIDEND_YIELD_FWD.between(3, 8))
 
-    // Conservative payout
-    .where(StockField.DIVIDEND_PAYOUT_RATIO_TTM.lte(60))
-
-    // Strong balance sheet
-    .where(StockField.CURRENT_RATIO_MRQ.gt(1.5))
-    .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(1))
-    .where(StockField.INTEREST_COVERAGE_TTM.gt(3))
-
     // Profitable
     .where(StockField.NET_INCOME_TTM.gt(0))
-    .where(StockField.OPERATING_MARGIN_TTM.gt(10))
+    .where(StockField.EARNINGS_PER_SHARE_DILUTED_TTM.gt(0))
 
-    // Positive cash flow
-    .where(StockField.FREE_CASH_FLOW_TTM.gt(0))
+    // Positive revenue growth
+    .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(-5))
+
+    // Large cap for stability
+    .where(StockField.MARKET_CAPITALIZATION.gt(2e9))
 
     .select(
       StockField.NAME,
       StockField.PRICE,
       StockField.DIVIDEND_YIELD_FWD,
-      StockField.DIVIDEND_PAYOUT_RATIO_TTM,
-      StockField.DEBT_TO_EQUITY_RATIO_MRQ,
-      StockField.FREE_CASH_FLOW_TTM
+      StockField.DPS_COMMON_STOCK_PRIM_ISSUE_TTM,
+      StockField.NET_INCOME_TTM,
+      StockField.EARNINGS_PER_SHARE_DILUTED_TTM
     )
     .sortBy(StockField.DIVIDEND_YIELD_FWD, false);
 
@@ -134,41 +121,41 @@ async function safeDividendScreen() {
 }
 ```
 
-## Monthly Dividend Payers
+## High Yield Stocks
+
+Find stocks with attractive dividend yields:
 
 ```typescript
 screener
-  .where(StockField.DIVIDEND_FREQUENCY.eq('Monthly'))
   .where(StockField.DIVIDEND_YIELD_FWD.gte(5))
-  .where(StockField.DIVIDEND_PAYOUT_RATIO_TTM.lte(80))
   .where(StockField.MARKET_CAPITALIZATION.gt(500e6))
+  .where(StockField.VOLUME.gt(100000))
+  .select(
+    StockField.NAME,
+    StockField.PRICE,
+    StockField.DIVIDEND_YIELD_FWD,
+    StockField.DPS_COMMON_STOCK_PRIM_ISSUE_TTM
+  )
   .sortBy(StockField.DIVIDEND_YIELD_FWD, false);
 ```
 
 ## Sector-Specific Dividend Strategies
 
-### REIT Income
+### High-Yield Sectors
 
-Real Estate Investment Trusts:
+Focus on traditionally high-dividend sectors:
 
 ```typescript
 screener
-  .where(StockField.SECTOR.eq('Real Estate'))
   .where(StockField.DIVIDEND_YIELD_FWD.gte(4))
-  .where(StockField.FUNDS_FROM_OPERATIONS_TTM.gt(0))
-  .where(StockField.PAYOUT_RATIO_FFO.lte(85))
-  .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(2))
-  .sortBy(StockField.DIVIDEND_YIELD_FWD, false);
-```
-
-### Utility Dividends
-
-```typescript
-screener
-  .where(StockField.SECTOR.eq('Utilities'))
-  .where(StockField.DIVIDEND_YIELD_FWD.gte(3.5))
-  .where(StockField.DIVIDEND_PAYOUT_RATIO_TTM.lte(70))
-  .where(StockField.CURRENT_RATIO_MRQ.gt(1))
+  .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
+  .where(StockField.VOLUME.gt(200000))
+  .select(
+    StockField.NAME,
+    StockField.PRICE,
+    StockField.DIVIDEND_YIELD_FWD,
+    StockField.MARKET_CAPITALIZATION
+  )
   .sortBy(StockField.DIVIDEND_YIELD_FWD, false);
 ```
 
@@ -183,15 +170,14 @@ async function dividendValueScreen() {
   screener
     // Dividend
     .where(StockField.DIVIDEND_YIELD_FWD.gte(3))
-    .where(StockField.DIVIDEND_PAYOUT_RATIO_TTM.lte(65))
 
     // Value
     .where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.lt(15))
     .where(StockField.PRICE_TO_BOOK_MRQ.lt(2))
 
     // Quality
-    .where(StockField.RETURN_ON_EQUITY_TTM.gt(12))
-    .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(1))
+    .where(StockField.NET_INCOME_TTM.gt(0))
+    .where(StockField.EARNINGS_PER_SHARE_DILUTED_TTM.gt(0))
 
     // Size
     .where(StockField.MARKET_CAPITALIZATION.gt(2e9))
@@ -201,7 +187,8 @@ async function dividendValueScreen() {
       StockField.PRICE,
       StockField.DIVIDEND_YIELD_FWD,
       StockField.PRICE_TO_EARNINGS_RATIO_TTM,
-      StockField.RETURN_ON_EQUITY_TTM
+      StockField.PRICE_TO_BOOK_MRQ,
+      StockField.EARNINGS_PER_SHARE_DILUTED_TTM
     )
     .sortBy(StockField.DIVIDEND_YIELD_FWD, false);
 
@@ -213,7 +200,7 @@ async function dividendValueScreen() {
 
     if (stock.dividend_yield_fwd > 4) score += 2;
     if (stock.price_earnings_ttm < 12) score += 2;
-    if (stock.return_on_equity_ttm > 15) score += 2;
+    if (stock.price_book_mrq < 1.5) score += 2;
 
     return { ...stock, dividendScore: score };
   });
@@ -230,47 +217,28 @@ async function buildDividendPortfolio(targetYield: number = 4) {
 
   screener
     .where(StockField.DIVIDEND_YIELD_FWD.gte(targetYield))
-    .where(StockField.DIVIDEND_PAYOUT_RATIO_TTM.lte(70))
-    .where(StockField.CURRENT_RATIO_MRQ.gt(1.2))
-    .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(1.5))
+    .where(StockField.NET_INCOME_TTM.gt(0))
     .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
+    .where(StockField.VOLUME.gt(200000))
     .select(
       StockField.NAME,
-      StockField.SECTOR,
+      StockField.PRICE,
       StockField.DIVIDEND_YIELD_FWD,
-      StockField.DIVIDEND_PAYOUT_RATIO_TTM,
+      StockField.DPS_COMMON_STOCK_PRIM_ISSUE_TTM,
       StockField.MARKET_CAPITALIZATION
     )
     .sortBy(StockField.DIVIDEND_YIELD_FWD, false)
-    .setRange(0, 100);
+    .setRange(0, 50);
 
   const results = await screener.get();
 
-  // Diversify by sector
-  const bySector = new Map<string, any[]>();
-
-  results.data.forEach(stock => {
-    const sector = stock.sector;
-    if (!bySector.has(sector)) {
-      bySector.set(sector, []);
-    }
-    bySector.get(sector)!.push(stock);
-  });
-
-  // Select top 2 from each sector
-  const portfolio = [];
-  for (const [sector, stocks] of bySector.entries()) {
-    portfolio.push(...stocks.slice(0, 2));
-  }
-
   // Calculate portfolio yield
-  const avgYield = portfolio.reduce((sum, s) => sum + s.dividend_yield_fwd, 0) / portfolio.length;
+  const avgYield = results.data.reduce((sum, s) => sum + s.dividend_yield_fwd, 0) / results.data.length;
 
   return {
-    stocks: portfolio,
-    count: portfolio.length,
+    stocks: results.data,
+    count: results.data.length,
     averageYield: avgYield.toFixed(2) + '%',
-    sectors: bySector.size,
   };
 }
 
@@ -278,42 +246,40 @@ async function buildDividendPortfolio(targetYield: number = 4) {
 const portfolio = await buildDividendPortfolio(4);
 console.log(`Portfolio: ${portfolio.count} stocks`);
 console.log(`Average Yield: ${portfolio.averageYield}`);
-console.log(`Sectors: ${portfolio.sectors}`);
 console.table(portfolio.stocks);
 ```
 
-## Ex-Dividend Calendar
+## Dividend Screening by Yield
 
-Find stocks going ex-dividend soon:
+Screen stocks by dividend yield ranges:
 
 ```typescript
-async function upcomingExDividend() {
+async function screenByDividendYield() {
   const screener = new StockScreener();
 
   screener
     .where(StockField.DIVIDEND_YIELD_FWD.gte(3))
-    .where(StockField.DIVIDEND_PAYOUT_RATIO_TTM.lte(75))
     .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
+    .where(StockField.NET_INCOME_TTM.gt(0))
     .select(
       StockField.NAME,
       StockField.PRICE,
       StockField.DIVIDEND_YIELD_FWD,
-      StockField.DIVIDEND_AMOUNT_RECENT,
-      StockField.EX_DIVIDEND_DATE
+      StockField.DPS_COMMON_STOCK_PRIM_ISSUE_TTM,
+      StockField.DIVIDENDS_YIELD_FY
     )
-    .sortBy(StockField.EX_DIVIDEND_DATE, true);
+    .sortBy(StockField.DIVIDEND_YIELD_FWD, false);
 
   const results = await screener.get();
 
-  // Filter for next 30 days
-  const upcoming = results.data.filter(stock => {
-    const exDate = new Date(stock.ex_dividend_date);
-    const today = new Date();
-    const diff = (exDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
-    return diff > 0 && diff <= 30;
-  });
+  // Categorize by yield
+  const categories = {
+    moderate: results.data.filter(s => s.dividend_yield_fwd >= 3 && s.dividend_yield_fwd < 5),
+    high: results.data.filter(s => s.dividend_yield_fwd >= 5 && s.dividend_yield_fwd < 8),
+    veryHigh: results.data.filter(s => s.dividend_yield_fwd >= 8),
+  };
 
-  return upcoming;
+  return categories;
 }
 ```
 
@@ -332,7 +298,7 @@ async function monitorDividendStocks(symbols: string[]) {
       StockField.PRICE,
       StockField.CHANGE_PERCENT,
       StockField.DIVIDEND_YIELD_FWD,
-      StockField.EX_DIVIDEND_DATE
+      StockField.DPS_COMMON_STOCK_PRIM_ISSUE_TTM
     );
 
   for await (const data of screener.stream({ interval: 60000 })) {
@@ -345,15 +311,15 @@ async function monitorDividendStocks(symbols: string[]) {
       let totalYield = 0;
 
       data.data.forEach((stock, i) => {
-        const change = stock.change_abs > 0 ? `+${stock.change_abs}%` : `${stock.change_abs}%`;
+        const change = stock.change_percent > 0 ? `+${stock.change_percent}%` : `${stock.change_percent}%`;
         console.log(
           `${(i + 1).toString().padStart(2)}. ${stock.name.padEnd(25)} ` +
-          `$${stock.close.toFixed(2).padStart(7)} ` +
+          `$${stock.price.toFixed(2).padStart(7)} ` +
           `${change.padStart(7)} ` +
           `Yield: ${stock.dividend_yield_fwd.toFixed(2)}%`
         );
 
-        totalValue += stock.close;
+        totalValue += stock.price;
         totalYield += stock.dividend_yield_fwd;
       });
 
@@ -368,12 +334,12 @@ await monitorDividendStocks(['JNJ', 'PG', 'KO', 'PEP', 'MCD']);
 
 ## Best Practices
 
-1. **Diversification**: Spread across sectors
-2. **Payout Ratio**: Keep below 70% for safety
-3. **Growth Rate**: Look for growing dividends
-4. **Financial Health**: Check debt and cash flow
-5. **Yield Trap**: Avoid extremely high yields (>10%)
-6. **Reinvestment**: Consider DRIP programs
+1. **Diversification**: Spread across sectors and companies
+2. **Yield Analysis**: Compare forward yield (DIVIDEND_YIELD_FWD) with fiscal year yield (DIVIDENDS_YIELD_FY)
+3. **Sustainability**: Check dividend per share (DPS_COMMON_STOCK_PRIM_ISSUE_TTM) relative to earnings
+4. **Financial Health**: Verify positive net income and earnings per share
+5. **Yield Trap**: Avoid extremely high yields (>10%) without thorough research
+6. **Size Matters**: Focus on larger cap companies for dividend stability
 
 ## Next Steps
 

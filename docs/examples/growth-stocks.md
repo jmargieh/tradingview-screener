@@ -18,37 +18,37 @@ import { StockScreener, StockField } from 'tradingview-screener';
 const screener = new StockScreener();
 
 screener
-  .where(StockField.REVENUE_GROWTH_TTM.gt(20))
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(20))
   .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
   .select(
     StockField.NAME,
     StockField.PRICE,
-    StockField.REVENUE_GROWTH_TTM,
+    StockField.REVENUE_TTM_YOY_GROWTH,
     StockField.MARKET_CAPITALIZATION
   )
-  .sortBy(StockField.REVENUE_GROWTH_TTM, false)
+  .sortBy(StockField.REVENUE_TTM_YOY_GROWTH, false)
   .setRange(0, 50);
 
 const results = await screener.get();
 console.table(results.data);
 ```
 
-### High Earnings Growth
+### Profitable Companies
 
-Companies with accelerating earnings:
+Companies with positive earnings:
 
 ```typescript
 screener
-  .where(StockField.EARNINGS_GROWTH_TTM.gt(25))
   .where(StockField.NET_INCOME_TTM.gt(0))  // Profitable
   .where(StockField.MARKET_CAPITALIZATION.between(1e9, 50e9))  // Mid-cap
+  .where(StockField.EARNINGS_PER_SHARE_DILUTED_TTM.gt(1))
   .select(
     StockField.NAME,
     StockField.PRICE,
-    StockField.EARNINGS_GROWTH_TTM,
-    StockField.NET_MARGIN_TTM
+    StockField.NET_INCOME_TTM,
+    StockField.EARNINGS_PER_SHARE_DILUTED_TTM
   )
-  .sortBy(StockField.EARNINGS_GROWTH_TTM, false);
+  .sortBy(StockField.NET_INCOME_TTM, false);
 ```
 
 ## GARP Strategy
@@ -61,16 +61,11 @@ async function garpScreen() {
 
   screener
     // Strong growth
-    .where(StockField.REVENUE_GROWTH_TTM.gt(15))
-    .where(StockField.EARNINGS_GROWTH_TTM.gt(15))
+    .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(15))
 
     // Reasonable valuation
     .where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.lt(30))
-    .where(StockField.PRICE_TO_EARNINGS_GROWTH_RATIO_TTM.lt(2))  // PEG < 2
-
-    // Quality
-    .where(StockField.OPERATING_MARGIN_TTM.gt(10))
-    .where(StockField.RETURN_ON_EQUITY_TTM.gt(15))
+    .where(StockField.PRICE_EARNINGS_GROWTH_TTM.lt(2))  // PEG < 2
 
     // Size
     .where(StockField.MARKET_CAPITALIZATION.gt(2e9))
@@ -78,12 +73,11 @@ async function garpScreen() {
     .select(
       StockField.NAME,
       StockField.PRICE,
-      StockField.REVENUE_GROWTH_TTM,
-      StockField.EARNINGS_GROWTH_TTM,
+      StockField.REVENUE_TTM_YOY_GROWTH,
       StockField.PRICE_TO_EARNINGS_RATIO_TTM,
-      StockField.PRICE_TO_EARNINGS_GROWTH_RATIO_TTM
+      StockField.PRICE_EARNINGS_GROWTH_TTM
     )
-    .sortBy(StockField.PRICE_TO_EARNINGS_GROWTH_RATIO_TTM, true);
+    .sortBy(StockField.PRICE_EARNINGS_GROWTH_TTM, true);
 
   return await screener.get();
 }
@@ -93,35 +87,27 @@ const garpStocks = await garpScreen();
 console.table(garpStocks.data);
 ```
 
-## High-Growth Tech
+## High-Growth Companies
 
-Technology growth companies:
+Companies with strong revenue growth:
 
 ```typescript
 const screener = new StockScreener();
 
 screener
-  // Sector filter
-  .where(StockField.SECTOR.eq('Technology'))
-
   // Strong growth
-  .where(StockField.REVENUE_GROWTH_TTM.gt(30))
-  .where(StockField.GROSS_MARGIN_TTM.gt(60))  // Tech margins
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(30))
 
-  // Profitability improving
-  .where(StockField.OPERATING_MARGIN_TTM.gt(5))
-
-  // Innovation metrics
-  .where(StockField.RESEARCH_DEVELOPMENT_TTM.gt(0))
+  // Profitable
+  .where(StockField.NET_INCOME_TTM.gt(0))
 
   .select(
     StockField.NAME,
     StockField.PRICE,
-    StockField.REVENUE_GROWTH_TTM,
-    StockField.GROSS_MARGIN_TTM,
-    StockField.OPERATING_MARGIN_TTM
+    StockField.REVENUE_TTM_YOY_GROWTH,
+    StockField.NET_INCOME_TTM
   )
-  .sortBy(StockField.REVENUE_GROWTH_TTM, false);
+  .sortBy(StockField.REVENUE_TTM_YOY_GROWTH, false);
 ```
 
 ## Small-Cap Growth
@@ -136,11 +122,7 @@ screener
   .where(StockField.MARKET_CAPITALIZATION.between(300e6, 2e9))
 
   // Explosive growth
-  .where(StockField.REVENUE_GROWTH_TTM.gt(40))
-  .where(StockField.EARNINGS_GROWTH_TTM.gt(30))
-
-  // Momentum
-  .where(StockField.CHANGE_PERCENT_1M.gt(10))
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(40))
 
   // Liquidity
   .where(StockField.VOLUME.gte(100_000))
@@ -152,52 +134,38 @@ screener
     StockField.NAME,
     StockField.PRICE,
     StockField.MARKET_CAPITALIZATION,
-    StockField.REVENUE_GROWTH_TTM,
-    StockField.CHANGE_PERCENT_1M
+    StockField.REVENUE_TTM_YOY_GROWTH,
+    StockField.VOLUME
   )
-  .sortBy(StockField.REVENUE_GROWTH_TTM, false);
+  .sortBy(StockField.REVENUE_TTM_YOY_GROWTH, false);
 ```
 
-## Accelerating Growth
+## Growth with Profitability
 
-Companies with increasing growth rates:
+Companies with strong growth and profitability:
 
 ```typescript
-async function acceleratingGrowthScreen() {
+async function profitableGrowthScreen() {
   const screener = new StockScreener();
 
   screener
     // Current growth
-    .where(StockField.REVENUE_GROWTH_TTM.gt(25))
-    .where(StockField.EARNINGS_GROWTH_TTM.gt(20))
+    .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(25))
 
-    // Improving margins (sign of operational leverage)
-    .where(StockField.OPERATING_MARGIN_TTM.gt(10))
-    .where(StockField.NET_MARGIN_TTM.gt(5))
-
-    // Strong ROE (efficient growth)
-    .where(StockField.RETURN_ON_EQUITY_TTM.gt(20))
-
-    // Not overleveraged
-    .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(1.5))
+    // Strong profitability
+    .where(StockField.NET_INCOME_TTM.gt(100e6))
+    .where(StockField.EARNINGS_PER_SHARE_DILUTED_TTM.gt(2))
 
     .select(
       StockField.NAME,
       StockField.PRICE,
-      StockField.REVENUE_GROWTH_TTM,
-      StockField.OPERATING_MARGIN_TTM,
-      StockField.RETURN_ON_EQUITY_TTM
+      StockField.REVENUE_TTM_YOY_GROWTH,
+      StockField.NET_INCOME_TTM,
+      StockField.EARNINGS_PER_SHARE_DILUTED_TTM
     )
-    .sortBy(StockField.REVENUE_GROWTH_TTM, false);
+    .sortBy(StockField.REVENUE_TTM_YOY_GROWTH, false);
 
-  const results = await screener.get();
-
-  // Filter for margin expansion
-  const expanding = results.data.filter(stock => {
-    return stock.operating_margin_ttm > stock.net_margin_ttm * 1.2;
-  });
-
-  return expanding;
+  return await screener.get();
 }
 ```
 
@@ -210,16 +178,11 @@ const screener = new StockScreener();
 
 screener
   // Growth
-  .where(StockField.REVENUE_GROWTH_TTM.gt(20))
-  .where(StockField.EARNINGS_PER_SHARE_GROWTH_TTM.gt(20))
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(20))
 
   // Profitability
-  .where(StockField.NET_MARGIN_TTM.gt(15))
-  .where(StockField.RETURN_ON_EQUITY_TTM.gt(20))
-  .where(StockField.RETURN_ON_ASSETS_TTM.gt(10))
-
-  // Cash generation
-  .where(StockField.FREE_CASH_FLOW_TTM.gt(0))
+  .where(StockField.NET_INCOME_TTM.gt(0))
+  .where(StockField.EARNINGS_PER_SHARE_DILUTED_TTM.gt(1))
 
   // Size
   .where(StockField.MARKET_CAPITALIZATION.gt(5e9))
@@ -227,33 +190,27 @@ screener
   .select(
     StockField.NAME,
     StockField.PRICE,
-    StockField.REVENUE_GROWTH_TTM,
-    StockField.NET_MARGIN_TTM,
-    StockField.RETURN_ON_EQUITY_TTM
+    StockField.REVENUE_TTM_YOY_GROWTH,
+    StockField.NET_INCOME_TTM,
+    StockField.EARNINGS_PER_SHARE_DILUTED_TTM
   )
-  .sortBy(StockField.RETURN_ON_EQUITY_TTM, false);
+  .sortBy(StockField.NET_INCOME_TTM, false);
 ```
 
-## SaaS Growth Screen
+## High Revenue Companies
 
-Software-as-a-Service growth metrics:
+Companies with strong revenue:
 
 ```typescript
-async function saasGrowthScreen() {
+async function highRevenueScreen() {
   const screener = new StockScreener();
 
   screener
-    // Industry
-    .where(StockField.INDUSTRY.match('.*Software.*'))
-
     // High growth
-    .where(StockField.REVENUE_GROWTH_TTM.gt(30))
+    .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(30))
 
-    // SaaS-like margins
-    .where(StockField.GROSS_MARGIN_TTM.gt(70))
-
-    // Improving efficiency
-    .where(StockField.OPERATING_MARGIN_TTM.gt(-20))  // Path to profitability
+    // Strong revenue base
+    .where(StockField.REVENUE_TTM.gt(500e6))
 
     // Market size
     .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
@@ -261,36 +218,29 @@ async function saasGrowthScreen() {
     .select(
       StockField.NAME,
       StockField.PRICE,
-      StockField.REVENUE_GROWTH_TTM,
-      StockField.GROSS_MARGIN_TTM,
-      StockField.OPERATING_MARGIN_TTM,
-      StockField.PRICE_TO_SALES_TTM
+      StockField.REVENUE_TTM_YOY_GROWTH,
+      StockField.REVENUE_TTM,
+      StockField.PRICE_SALES_CURRENT
     )
-    .sortBy(StockField.REVENUE_GROWTH_TTM, false);
+    .sortBy(StockField.REVENUE_TTM_YOY_GROWTH, false);
 
   return await screener.get();
 }
 ```
 
-## Healthcare Growth
+## Large Cap Growth
 
-High-growth healthcare companies:
+High-growth large companies:
 
 ```typescript
 const screener = new StockScreener();
 
 screener
-  // Sector
-  .where(StockField.SECTOR.eq('Healthcare'))
-
   // Strong growth
-  .where(StockField.REVENUE_GROWTH_TTM.gt(20))
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(20))
 
-  // R&D investment
-  .where(StockField.RESEARCH_DEVELOPMENT_TTM.gt(0))
-
-  // Profitability or near profitability
-  .where(StockField.OPERATING_MARGIN_TTM.gt(-10))
+  // Minimum revenue
+  .where(StockField.REVENUE_TTM.gt(100e6))
 
   // Size range
   .where(StockField.MARKET_CAPITALIZATION.between(1e9, 50e9))
@@ -298,32 +248,27 @@ screener
   .select(
     StockField.NAME,
     StockField.PRICE,
-    StockField.REVENUE_GROWTH_TTM,
-    StockField.OPERATING_MARGIN_TTM,
+    StockField.REVENUE_TTM_YOY_GROWTH,
+    StockField.REVENUE_TTM,
     StockField.MARKET_CAPITALIZATION
   )
-  .sortBy(StockField.REVENUE_GROWTH_TTM, false);
+  .sortBy(StockField.REVENUE_TTM_YOY_GROWTH, false);
 ```
 
 ## Momentum Growth
 
-Combining growth with price momentum:
+Combining growth with technical momentum:
 
 ```typescript
 const screener = new StockScreener();
 
 screener
   // Fundamental growth
-  .where(StockField.REVENUE_GROWTH_TTM.gt(25))
-  .where(StockField.EARNINGS_GROWTH_TTM.gt(20))
-
-  // Price momentum
-  .where(StockField.CHANGE_PERCENT_1M.gt(15))
-  .where(StockField.CHANGE_PERCENT_3M.gt(20))
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(25))
 
   // Technical strength
   .where(StockField.RSI.between(50, 70))
-  .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50))
+  .where(StockField.CHANGE_PERCENT.gt(0))  // Positive daily change
 
   // Volume confirmation
   .where(StockField.VOLUME.gte(500_000))
@@ -331,11 +276,11 @@ screener
   .select(
     StockField.NAME,
     StockField.PRICE,
-    StockField.REVENUE_GROWTH_TTM,
-    StockField.CHANGE_PERCENT_1M,
+    StockField.REVENUE_TTM_YOY_GROWTH,
+    StockField.CHANGE_PERCENT,
     StockField.RSI
   )
-  .sortBy(StockField.CHANGE_PERCENT_1M, false);
+  .sortBy(StockField.REVENUE_TTM_YOY_GROWTH, false);
 ```
 
 ## Emerging Growth
@@ -351,63 +296,37 @@ async function emergingGrowthScreen() {
     .where(StockField.MARKET_CAPITALIZATION.between(500e6, 5e9))
 
     // Explosive revenue growth
-    .where(StockField.REVENUE_GROWTH_TTM.gt(50))
+    .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(50))
 
-    // Not yet profitable is okay
-    .where(StockField.GROSS_MARGIN_TTM.gt(40))
-
-    // Operating leverage improving
-    .where(StockField.REVENUE_TTM.gt(100e6))  // Minimum scale
-
-    // Momentum
-    .where(StockField.CHANGE_PERCENT_3M.gt(0))
+    // Minimum scale
+    .where(StockField.REVENUE_TTM.gt(100e6))
 
     .select(
       StockField.NAME,
       StockField.PRICE,
       StockField.MARKET_CAPITALIZATION,
-      StockField.REVENUE_GROWTH_TTM,
-      StockField.GROSS_MARGIN_TTM,
-      StockField.OPERATING_MARGIN_TTM
+      StockField.REVENUE_TTM_YOY_GROWTH,
+      StockField.REVENUE_TTM
     )
-    .sortBy(StockField.REVENUE_GROWTH_TTM, false);
+    .sortBy(StockField.REVENUE_TTM_YOY_GROWTH, false);
 
-  const results = await screener.get();
-
-  // Calculate Rule of 40 (Growth % + Margin %)
-  const enriched = results.data.map(stock => {
-    const ruleOf40 = stock.revenue_growth_ttm + stock.operating_margin_ttm;
-
-    return {
-      ...stock,
-      ruleOf40: ruleOf40.toFixed(1),
-    };
-  });
-
-  // Filter for Rule of 40 > 40
-  return enriched.filter(s => parseFloat(s.ruleOf40) > 40);
+  return await screener.get();
 }
 ```
 
-## Consistent Growth
+## Strong Revenue Growth
 
-Companies with sustained growth:
+Companies with sustained revenue growth:
 
 ```typescript
 const screener = new StockScreener();
 
 screener
-  // Steady growth
-  .where(StockField.REVENUE_GROWTH_TTM.gt(15))
-  .where(StockField.REVENUE_GROWTH_3Y.gt(15))
-  .where(StockField.REVENUE_GROWTH_5Y.gt(12))
+  // Strong current growth
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(15))
 
-  // Earnings growth
-  .where(StockField.EARNINGS_GROWTH_TTM.gt(10))
-
-  // Quality metrics
-  .where(StockField.RETURN_ON_EQUITY_TTM.gt(15))
-  .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(1))
+  // Profitability
+  .where(StockField.NET_INCOME_TTM.gt(0))
 
   // Established but growing
   .where(StockField.MARKET_CAPITALIZATION.gt(5e9))
@@ -415,11 +334,11 @@ screener
   .select(
     StockField.NAME,
     StockField.PRICE,
-    StockField.REVENUE_GROWTH_TTM,
-    StockField.REVENUE_GROWTH_3Y,
-    StockField.REVENUE_GROWTH_5Y
+    StockField.REVENUE_TTM_YOY_GROWTH,
+    StockField.REVENUE_TTM,
+    StockField.NET_INCOME_TTM
   )
-  .sortBy(StockField.REVENUE_GROWTH_5Y, false);
+  .sortBy(StockField.REVENUE_TTM_YOY_GROWTH, false);
 ```
 
 ## Growth Score System
@@ -431,17 +350,15 @@ async function growthScoreScreen() {
   const screener = new StockScreener();
 
   screener
-    .where(StockField.REVENUE_GROWTH_TTM.gt(15))
+    .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(15))
     .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
     .select(
       StockField.NAME,
       StockField.PRICE,
-      StockField.REVENUE_GROWTH_TTM,
-      StockField.EARNINGS_GROWTH_TTM,
-      StockField.OPERATING_MARGIN_TTM,
-      StockField.RETURN_ON_EQUITY_TTM,
-      StockField.PRICE_TO_EARNINGS_GROWTH_RATIO_TTM,
-      StockField.CHANGE_PERCENT_3M
+      StockField.REVENUE_TTM_YOY_GROWTH,
+      StockField.NET_INCOME_TTM,
+      StockField.PRICE_EARNINGS_GROWTH_TTM,
+      StockField.CHANGE_PERCENT
     );
 
   const results = await screener.get();
@@ -451,29 +368,22 @@ async function growthScoreScreen() {
     let score = 0;
 
     // Revenue growth
-    if (stock.revenue_growth_ttm > 30) score += 3;
-    else if (stock.revenue_growth_ttm > 20) score += 2;
-    else if (stock.revenue_growth_ttm > 15) score += 1;
-
-    // Earnings growth
-    if (stock.earnings_growth_ttm > 25) score += 2;
-    else if (stock.earnings_growth_ttm > 15) score += 1;
+    if (stock.revenue_ttm_yoy_growth > 30) score += 3;
+    else if (stock.revenue_ttm_yoy_growth > 20) score += 2;
+    else if (stock.revenue_ttm_yoy_growth > 15) score += 1;
 
     // Profitability
-    if (stock.operating_margin_ttm > 15) score += 2;
-    else if (stock.operating_margin_ttm > 10) score += 1;
-
-    // Efficiency
-    if (stock.return_on_equity_ttm > 20) score += 2;
-    else if (stock.return_on_equity_ttm > 15) score += 1;
+    if (stock.net_income_ttm > 500e6) score += 3;
+    else if (stock.net_income_ttm > 100e6) score += 2;
+    else if (stock.net_income_ttm > 0) score += 1;
 
     // Valuation (PEG ratio)
-    if (stock.peg_ratio_ttm < 1) score += 2;
-    else if (stock.peg_ratio_ttm < 1.5) score += 1;
+    if (stock.peg_ratio_ttm && stock.peg_ratio_ttm < 1) score += 2;
+    else if (stock.peg_ratio_ttm && stock.peg_ratio_ttm < 1.5) score += 1;
 
-    // Momentum
-    if (stock.change_percent_3m > 20) score += 2;
-    else if (stock.change_percent_3m > 10) score += 1;
+    // Price momentum
+    if (stock.change_abs > 2) score += 2;
+    else if (stock.change_abs > 0) score += 1;
 
     return { ...stock, growthScore: score };
   });
@@ -499,15 +409,15 @@ async function monitorGrowthStocks() {
   const screener = new StockScreener();
 
   screener
-    .where(StockField.REVENUE_GROWTH_TTM.gt(25))
+    .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(25))
     .where(StockField.MARKET_CAPITALIZATION.gt(2e9))
     .select(
       StockField.NAME,
       StockField.PRICE,
-      StockField.REVENUE_GROWTH_TTM,
+      StockField.REVENUE_TTM_YOY_GROWTH,
       StockField.CHANGE_PERCENT
     )
-    .sortBy(StockField.REVENUE_GROWTH_TTM, false)
+    .sortBy(StockField.REVENUE_TTM_YOY_GROWTH, false)
     .setRange(0, 20);
 
   for await (const data of screener.stream({ interval: 60000 })) {
@@ -521,7 +431,7 @@ async function monitorGrowthStocks() {
         console.log(
           `${i + 1}. ${stock.name.padEnd(30)} ` +
           `$${stock.close.toFixed(2).padStart(8)} ` +
-          `Growth: ${stock.revenue_growth_ttm}% ` +
+          `Growth: ${stock.revenue_ttm_yoy_growth}% ` +
           `Today: ${change}`
         );
       });
@@ -533,11 +443,11 @@ async function monitorGrowthStocks() {
 ## Best Practices
 
 1. **Balance Growth & Valuation**: Use PEG ratio to avoid overpaying
-2. **Quality Matters**: Look for margin expansion and ROE
-3. **Sustainable Growth**: Check debt levels and cash flow
-4. **Sector Trends**: Focus on industries with tailwinds
-5. **Momentum Confirmation**: Combine fundamentals with technicals
-6. **Position Sizing**: Growth stocks are volatile, manage risk
+2. **Quality Matters**: Look for profitable companies with strong earnings
+3. **Size Considerations**: Different market caps have different risk/reward profiles
+4. **Momentum Confirmation**: Combine fundamentals with technicals
+5. **Position Sizing**: Growth stocks are volatile, manage risk
+6. **Revenue Quality**: Focus on companies with strong revenue bases
 
 ## Next Steps
 

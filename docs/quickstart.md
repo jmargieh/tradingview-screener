@@ -308,7 +308,7 @@ const baseScreener = new StockScreener()
 
 // Query 1: High growth
 const growth = await baseScreener
-  .where(StockField.REVENUE_GROWTH_TTM.gt(20))
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(20))
   .select(StockField.NAME, StockField.PRICE)
   .get();
 

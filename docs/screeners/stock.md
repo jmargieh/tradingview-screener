@@ -70,14 +70,12 @@ screener
 
 ```typescript
 screener
-  .where(StockField.REVENUE_GROWTH_TTM.gt(20))
-  .where(StockField.EARNINGS_GROWTH_TTM.gt(15))
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(20))
   .where(StockField.MARKET_CAPITALIZATION.between(1e9, 50e9))
   .select(
     StockField.NAME,
-    StockField.REVENUE_GROWTH_TTM,
-    StockField.EARNINGS_GROWTH_TTM,
-    StockField.PRICE_TO_EARNINGS_GROWTH_RATIO_TTM
+    StockField.REVENUE_TTM_YOY_GROWTH,
+    StockField.PRICE_EARNINGS_GROWTH_TTM
   );
 ```
 
@@ -86,14 +84,12 @@ screener
 ```typescript
 screener
   .where(StockField.DIVIDEND_YIELD_FWD.gte(4))
-  .where(StockField.DIVIDEND_PAYOUT_RATIO_TTM.lte(70))
   .where(StockField.MARKET_CAPITALIZATION.gte(5e9))
   .select(
     StockField.NAME,
     StockField.PRICE,
     StockField.DIVIDEND_YIELD_FWD,
-    StockField.DIVIDEND_PAYOUT_RATIO_TTM,
-    StockField.DIVIDENDS_PER_SHARE_FY
+    StockField.DPS_COMMON_STOCK_PRIM_ISSUE_TTM
   )
   .sortBy(StockField.DIVIDEND_YIELD_FWD, false);
 ```
@@ -122,89 +118,45 @@ screener
 - `CHANGE` - Absolute price change
 - `CHANGE_PERCENT` - Percentage change
 - `VOLUME` - Trading volume
-- `AVERAGE_VOLUME_10D` - 10-day average volume
-- `AVERAGE_VOLUME_30D` - 30-day average volume
-- `RELATIVE_VOLUME_10D` - Volume relative to 10-day average
 
 ### Market Data
 - `MARKET_CAPITALIZATION` - Market cap
 - `NAME` - Company name
 - `DESCRIPTION` - Company description
-- `SECTOR` - Business sector
-- `INDUSTRY` - Industry classification
-- `COUNTRY` - Country of incorporation
 
 ### Valuation Ratios
 - `PRICE_TO_EARNINGS_RATIO_TTM` - P/E ratio (trailing 12 months)
 - `PRICE_TO_BOOK_MRQ` - P/B ratio (most recent quarter)
-- `PRICE_TO_SALES_RATIO_TTM` - P/S ratio
+- `PRICE_SALES_CURRENT` - P/S ratio
 - `ENTERPRISE_VALUE_EBITDA_TTM` - EV/EBITDA
-- `PRICE_TO_EARNINGS_GROWTH_RATIO_TTM` - PEG ratio
-- `PRICE_TO_FREE_CASH_FLOW_TTM` - P/FCF ratio
+- `PRICE_EARNINGS_GROWTH_TTM` - PEG ratio
 
 ### Income Statement
 - `REVENUE_TTM` - Total revenue (trailing 12 months)
-- `REVENUE_GROWTH_TTM` - Revenue growth rate
+- `REVENUE_TTM_YOY_GROWTH` - Revenue growth rate
 - `NET_INCOME_TTM` - Net income
-- `NET_INCOME_GROWTH_TTM` - Net income growth
-- `OPERATING_MARGIN_TTM` - Operating margin
-- `NET_MARGIN_TTM` - Net profit margin
-- `EBITDA_TTM` - EBITDA
-
-### Balance Sheet
-- `TOTAL_ASSETS_MRQ` - Total assets (most recent quarter)
-- `TOTAL_LIABILITIES_MRQ` - Total liabilities
-- `TOTAL_EQUITY_MRQ` - Total equity
-- `DEBT_TO_EQUITY_RATIO_MRQ` - Debt/equity ratio
-- `CURRENT_RATIO_MRQ` - Current ratio
-- `QUICK_RATIO_MRQ` - Quick ratio
-
-### Cash Flow
-- `FREE_CASH_FLOW_TTM` - Free cash flow
-- `OPERATING_CASH_FLOW_TTM` - Operating cash flow
-- `LEVERED_FREE_CASH_FLOW_TTM` - Levered free cash flow
 
 ### Dividends
 - `DIVIDEND_YIELD_FWD` - Forward dividend yield
-- `DIVIDENDS_PER_SHARE_FY` - Annual dividends per share
-- `DIVIDEND_PAYOUT_RATIO_TTM` - Payout ratio
-- `DIVIDEND_GROWTH_RATE_5Y` - 5-year dividend growth
+- `DIVIDENDS_YIELD_FY` - Annual dividend yield (fiscal year)
+- `DPS_COMMON_STOCK_PRIM_ISSUE_TTM` - Dividends per share (TTM)
 
 ### Per Share Metrics
 - `EARNINGS_PER_SHARE_DILUTED_TTM` - EPS (diluted)
-- `EARNINGS_PER_SHARE_BASIC_TTM` - EPS (basic)
-- `BOOK_VALUE_PER_SHARE_MRQ` - Book value per share
-- `FREE_CASH_FLOW_PER_SHARE_TTM` - FCF per share
-- `REVENUE_PER_SHARE_TTM` - Revenue per share
 
 ### Technical Indicators
 - `RSI` - Relative Strength Index
 - `ATR` - Average True Range
-- `MACD` - MACD indicator
-- `STOCHASTIC_K` - Stochastic %K
-- `STOCHASTIC_D` - Stochastic %D
-- `BOLLINGER_BANDS_UPPER` - Upper Bollinger Band
-- `BOLLINGER_BANDS_LOWER` - Lower Bollinger Band
-- `MOVING_AVERAGE_50` - 50-day MA
-- `MOVING_AVERAGE_200` - 200-day MA
-
-### Recommendations
-- `ANALYST_RECOMMENDATION` - Analyst consensus rating
-- `ANALYST_TARGET_PRICE` - Average price target
-- `COMPUTED_RECOMMENDATION_ALL` - Computed recommendation
 
 ## Filtering Examples
 
 ### Multiple Conditions
 
 ```typescript
-// Large cap tech stocks with strong fundamentals
+// Large cap stocks with strong fundamentals
 screener
   .where(StockField.MARKET_CAPITALIZATION.gt(50e9))
-  .where(StockField.SECTOR.eq('Technology'))
-  .where(StockField.REVENUE_GROWTH_TTM.gt(15))
-  .where(StockField.OPERATING_MARGIN_TTM.gt(20))
-  .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(0.5));
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(15));
 ```
 
 ### Range Filters
@@ -220,19 +172,8 @@ screener
 ### List Filters
 
 ```typescript
-// Stocks in specific sectors
-screener.where(
-  StockField.SECTOR.isin([
-    'Technology',
-    'Healthcare',
-    'Consumer Cyclical'
-  ])
-);
-
-// Stocks in specific countries
-screener.where(
-  StockField.COUNTRY.isin(['US', 'CA', 'GB'])
-);
+// Filter by name pattern (example)
+// Note: SECTOR and COUNTRY fields are not available in the current API
 ```
 
 ## Sorting
@@ -295,11 +236,11 @@ screener.select(
 ### Select All Fields
 
 ```typescript
-// Get all available fields (15+ fields)
+// Get all available fields
 screener.selectAll();
 
 const results = await screener.get();
-// Results will have all available stock fields
+// Results will have all 21 available stock fields
 ```
 
 ## Working with Results
@@ -357,16 +298,14 @@ const screener = new StockScreener();
 ### Specific Exchange
 
 ```typescript
-screener.where(StockField.EXCHANGE.eq('NASDAQ'));
-screener.where(StockField.EXCHANGE.eq('NYSE'));
+// Note: EXCHANGE field is not available in the current API
+// Use country/exchange filters through other means if needed
 ```
 
 ### Multiple Countries
 
 ```typescript
-screener.where(
-  StockField.COUNTRY.isin(['US', 'CA', 'GB', 'DE'])
-);
+// Note: COUNTRY field is not available in the current API
 ```
 
 ## Advanced Techniques
@@ -393,8 +332,6 @@ screener
 screener
   .where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.lt(15))
   .where(StockField.PRICE_TO_BOOK_MRQ.lt(2))
-  .where(StockField.RETURN_ON_EQUITY_TTM.gt(15))
-  .where(StockField.DEBT_TO_EQUITY_RATIO_MRQ.lt(1))
   .where(StockField.MARKET_CAPITALIZATION.gte(1e9));
 ```
 
@@ -402,10 +339,7 @@ screener
 
 ```typescript
 screener
-  .where(StockField.REVENUE_GROWTH_TTM.gt(20))
-  .where(StockField.OPERATING_MARGIN_TTM.gt(15))
-  .where(StockField.RETURN_ON_EQUITY_TTM.gt(20))
-  .where(StockField.CURRENT_RATIO_MRQ.gt(1.5))
+  .where(StockField.REVENUE_TTM_YOY_GROWTH.gt(20))
   .where(StockField.MARKET_CAPITALIZATION.between(1e9, 50e9));
 ```
 

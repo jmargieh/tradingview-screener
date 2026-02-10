@@ -39,45 +39,44 @@ RSI between 50-70 (bullish but not overbought):
 ```typescript
 screener
   .where(StockField.RSI.between(50, 70))
-  .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50))
   .where(StockField.VOLUME.gte(1_000_000))
+  .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
   .sortBy(StockField.CHANGE_PERCENT, false);
 ```
 
-## Moving Average Strategies
+## Volatility Analysis
 
-### Golden Cross
+### High Volatility Stocks
 
-Price above both 50-day and 200-day MA:
+Find stocks with significant price movement using ATR:
 
 ```typescript
 const screener = new StockScreener();
 
 screener
-  .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50))
-  .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_200))
-  .where(StockField.MOVING_AVERAGE_50.above(StockField.MOVING_AVERAGE_200))
+  .where(StockField.ATR.gt(2))  // High volatility
+  .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
   .where(StockField.VOLUME.gte(500_000))
   .select(
     StockField.NAME,
     StockField.PRICE,
-    StockField.MOVING_AVERAGE_50,
-    StockField.MOVING_AVERAGE_200,
-    StockField.CHANGE_PERCENT
+    StockField.ATR,
+    StockField.CHANGE_PERCENT,
+    StockField.VOLUME
   )
-  .sortBy(StockField.CHANGE_PERCENT, false);
+  .sortBy(StockField.ATR, false);
 ```
 
-### Pullback to MA
+### Low Volatility Screening
 
-Price pulling back to moving average (buying opportunity):
+Stable stocks with lower risk:
 
 ```typescript
 screener
-  .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_200))
-  .where(StockField.PRICE.near(StockField.MOVING_AVERAGE_50, 0.02))  // Within 2%
+  .where(StockField.ATR.lt(1))  // Low volatility
+  .where(StockField.MARKET_CAPITALIZATION.gt(5e9))
   .where(StockField.RSI.between(40, 60))
-  .sortBy(StockField.VOLUME, false);
+  .sortBy(StockField.MARKET_CAPITALIZATION, false);
 ```
 
 ## Momentum Screening
@@ -90,83 +89,79 @@ Stocks with powerful upward momentum:
 const screener = new StockScreener();
 
 screener
-  .where(StockField.CHANGE_PERCENT.gt(3))  // Today
-  .where(StockField.CHANGE_PERCENT_1W.gt(7))  // 1 week
-  .where(StockField.CHANGE_PERCENT_1M.gt(15))  // 1 month
+  .where(StockField.CHANGE_PERCENT.gt(3))  // Today's change
   .where(StockField.VOLUME.gte(1_000_000))
   .where(StockField.RSI.lt(70))  // Not overbought yet
+  .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
   .select(
     StockField.NAME,
     StockField.PRICE,
     StockField.CHANGE_PERCENT,
-    StockField.CHANGE_PERCENT_1W,
-    StockField.CHANGE_PERCENT_1M,
+    StockField.VOLUME,
     StockField.RSI
   )
-  .sortBy(StockField.CHANGE_PERCENT_1M, false);
+  .sortBy(StockField.CHANGE_PERCENT, false);
 ```
 
-### Volume Breakout
+### Volume Surge
 
 High volume with price increase:
 
 ```typescript
 screener
   .where(StockField.CHANGE_PERCENT.gt(2))
-  .where(StockField.VOLUME.gte(StockField.AVERAGE_VOLUME_10D.multiply(2)))  // 2x avg volume
+  .where(StockField.VOLUME.gte(2_000_000))  // High volume threshold
   .where(StockField.MARKET_CAPITALIZATION.gt(500e6))
   .sortBy(StockField.VOLUME, false);
 ```
 
-## MACD Strategy
+## Price and RSI Strategy
 
-### MACD Crossover
+### RSI Divergence Setup
 
-Bullish MACD crossover:
+Identify potential reversals with RSI:
 
 ```typescript
 const screener = new StockScreener();
 
 screener
-  .where(StockField.MACD_LEVEL.above(StockField.MACD_SIGNAL))
-  .where(StockField.MACD_LEVEL.gt(0))
-  .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50))
+  .where(StockField.RSI.lt(30))  // Oversold
+  .where(StockField.CHANGE_PERCENT.gt(-5))  // Not in free fall
   .where(StockField.VOLUME.gte(500_000))
+  .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
   .select(
     StockField.NAME,
     StockField.PRICE,
-    StockField.MACD_LEVEL,
-    StockField.MACD_SIGNAL,
-    StockField.CHANGE_PERCENT
+    StockField.RSI,
+    StockField.CHANGE_PERCENT,
+    StockField.ATR
   )
-  .sortBy(StockField.CHANGE_PERCENT, false);
+  .sortBy(StockField.RSI, true);
 ```
 
-## Bollinger Bands
+## Volatility-Based Trading
 
-### Bollinger Squeeze
+### ATR Breakout Scanner
 
-Low volatility, potential breakout:
+High volatility breakout opportunities:
 
 ```typescript
 screener
-  .where(StockField.BOLLINGER_BAND_WIDTH.lt(0.05))  // Tight bands
-  .where(StockField.PRICE.between(
-    StockField.BOLLINGER_LOWER,
-    StockField.BOLLINGER_UPPER
-  ))
+  .where(StockField.ATR.gt(1.5))  // Significant volatility
+  .where(StockField.CHANGE_PERCENT.gt(3))
   .where(StockField.VOLUME.gte(500_000))
-  .sortBy(StockField.BOLLINGER_BAND_WIDTH, true);
+  .where(StockField.MARKET_CAPITALIZATION.gt(500e6))
+  .sortBy(StockField.ATR, false);
 ```
 
-### Bollinger Bounce
+### RSI with Low Volatility
 
-Price at lower band (oversold):
+Oversold stocks with manageable risk:
 
 ```typescript
 screener
-  .where(StockField.PRICE.near(StockField.BOLLINGER_LOWER, 0.01))
   .where(StockField.RSI.lt(40))
+  .where(StockField.ATR.lt(2))  // Lower volatility/risk
   .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
   .sortBy(StockField.RSI, true);
 ```
@@ -180,20 +175,17 @@ async function comprehensiveTechnicalScreen() {
   const screener = new StockScreener();
 
   screener
-    // Trend
-    .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50))
-    .where(StockField.MOVING_AVERAGE_50.above(StockField.MOVING_AVERAGE_200))
-
-    // Momentum
+    // RSI momentum
     .where(StockField.RSI.between(50, 70))
-    .where(StockField.CHANGE_PERCENT_1M.gt(10))
 
-    // MACD
-    .where(StockField.MACD_LEVEL.above(StockField.MACD_SIGNAL))
+    // Volatility check
+    .where(StockField.ATR.gt(0.5))  // Some volatility for trading
 
     // Volume
     .where(StockField.VOLUME.gte(500_000))
-    .where(StockField.RELATIVE_VOLUME_10D.gt(1.2))  // Above average
+
+    // Price movement
+    .where(StockField.CHANGE_PERCENT.gt(1))
 
     // Size
     .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
@@ -202,11 +194,11 @@ async function comprehensiveTechnicalScreen() {
       StockField.NAME,
       StockField.PRICE,
       StockField.RSI,
-      StockField.MACD_LEVEL,
-      StockField.CHANGE_PERCENT_1M,
-      StockField.RELATIVE_VOLUME_10D
+      StockField.ATR,
+      StockField.CHANGE_PERCENT,
+      StockField.VOLUME
     )
-    .sortBy(StockField.CHANGE_PERCENT_1M, false);
+    .sortBy(StockField.CHANGE_PERCENT, false);
 
   return await screener.get();
 }
@@ -214,58 +206,61 @@ async function comprehensiveTechnicalScreen() {
 
 ## Breakout Scanner
 
-### New 52-Week Highs
+### Price Momentum Breakout
+
+Stocks with strong price movement:
 
 ```typescript
 screener
-  .where(StockField.PRICE.gte(StockField.PRICE_52W_HIGH.multiply(0.98)))  // Within 2% of high
-  .where(StockField.VOLUME.gte(StockField.AVERAGE_VOLUME_10D.multiply(1.5)))
+  .where(StockField.CHANGE_PERCENT.gt(5))
+  .where(StockField.VOLUME.gte(1_000_000))
   .where(StockField.RSI.lt(75))
+  .where(StockField.MARKET_CAPITALIZATION.gt(500e6))
   .sortBy(StockField.CHANGE_PERCENT, false);
 ```
 
-### Support Breakout
+### Volume Breakout with Volatility
 
-Price breaking above resistance:
+High volume with significant price range:
 
 ```typescript
 screener
-  .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_200))
-  .where(StockField.CHANGE_PERCENT.gt(5))
-  .where(StockField.VOLUME.gte(StockField.AVERAGE_VOLUME_10D.multiply(2)))
-  .where(StockField.ATR.gt(0))  // Volatility present
+  .where(StockField.VOLUME.gte(2_000_000))
+  .where(StockField.CHANGE_PERCENT.gt(3))
+  .where(StockField.ATR.gt(1))  // Volatility present
+  .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
   .sortBy(StockField.VOLUME, false);
 ```
 
-## Swing Trading Setup
+## Trading Setup Scanner
 
-### Setup Scanner
+### Entry Point Scanner
+
+Find potential entry points:
 
 ```typescript
-async function swingTradingSetup() {
+async function tradingSetup() {
   const screener = new StockScreener();
 
   screener
-    // Uptrend
-    .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50))
-    .where(StockField.MOVING_AVERAGE_50.above(StockField.MOVING_AVERAGE_200))
-
-    // Pullback
+    // Look for pullbacks in momentum
     .where(StockField.CHANGE_PERCENT.between(-3, 0))
 
-    // Technical support
+    // RSI support level
     .where(StockField.RSI.between(35, 50))
-    .where(StockField.PRICE.near(StockField.MOVING_AVERAGE_20, 0.03))
 
-    // Volume confirmation
+    // Adequate volume
     .where(StockField.VOLUME.gte(500_000))
+
+    // Quality stocks
+    .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
 
     .select(
       StockField.NAME,
       StockField.PRICE,
       StockField.RSI,
       StockField.CHANGE_PERCENT,
-      StockField.MOVING_AVERAGE_50
+      StockField.ATR
     )
     .sortBy(StockField.RSI, true);
 
@@ -273,42 +268,44 @@ async function swingTradingSetup() {
 }
 ```
 
-## Day Trading Scanner
+## Active Trading Scanner
 
-### Gap and Go
+### High Activity Stocks
 
-Stocks gapping up with volume:
+Stocks with strong intraday movement:
 
 ```typescript
 screener
-  .where(StockField.GAP_PERCENT.gt(3))
+  .where(StockField.CHANGE_PERCENT.gt(3))
   .where(StockField.VOLUME.gte(1_000_000))
-  .where(StockField.PRICE.between(5, 50))
-  .where(StockField.RELATIVE_VOLUME_10D.gt(2))
-  .sortBy(StockField.GAP_PERCENT, false);
+  .where(StockField.PRICE.between(5, 100))
+  .where(StockField.ATR.gt(0.5))
+  .sortBy(StockField.CHANGE_PERCENT, false);
 ```
 
-### Intraday Momentum
+### Momentum Scanner
+
+Strong momentum with RSI confirmation:
 
 ```typescript
 screener
   .where(StockField.CHANGE_PERCENT.gt(5))
-  .where(StockField.VOLUME.gte(StockField.AVERAGE_VOLUME_10D.multiply(3)))
+  .where(StockField.VOLUME.gte(2_000_000))
   .where(StockField.RSI.between(60, 80))
   .where(StockField.PRICE.gt(10))
-  .sortBy(StockField.RELATIVE_VOLUME_10D, false);
+  .sortBy(StockField.VOLUME, false);
 ```
 
 ## Real-Time Technical Monitor
 
 ```typescript
-async function liveT echnicalMonitor() {
+async function liveTechnicalMonitor() {
   const screener = new StockScreener();
 
   screener
     .where(StockField.RSI.between(50, 70))
-    .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50))
     .where(StockField.VOLUME.gte(1_000_000))
+    .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
     .select(
       StockField.NAME,
       StockField.PRICE,
@@ -326,9 +323,8 @@ async function liveT echnicalMonitor() {
       console.log(`${new Date().toLocaleTimeString()}\n`);
 
       data.data.forEach((stock, i) => {
-        const signal = stock.rsi > 65 ? '🔥' : stock.rsi > 55 ? '📈' : '✓';
         console.log(
-          `${signal} ${(i + 1).toString().padStart(2)}. ` +
+          `${(i + 1).toString().padStart(2)}. ` +
           `${stock.name.padEnd(25)} ` +
           `$${stock.close.toFixed(2).padStart(7)} ` +
           `RSI: ${stock.rsi.toFixed(1).padStart(5)} ` +
@@ -342,11 +338,11 @@ async function liveT echnicalMonitor() {
 
 ## Best Practices
 
-1. **Multiple Confirmations**: Use 2-3 indicators together
-2. **Volume Verification**: Always check volume
-3. **Risk Management**: Set stop losses based on ATR
-4. **Timeframe Alignment**: Check multiple timeframes
-5. **Market Context**: Consider overall market trend
+1. **RSI Analysis**: Use RSI (30 oversold, 70 overbought) for momentum signals
+2. **ATR for Risk**: Use ATR to gauge volatility and set appropriate stop losses
+3. **Volume Verification**: Always check volume to confirm price movements
+4. **Multiple Confirmations**: Combine RSI and ATR with price and volume
+5. **Market Context**: Consider overall market trend and conditions
 
 ## Next Steps
 

@@ -47,8 +47,8 @@ StockField.PRICE.gt(100)
 // Between range
 StockField.MARKET_CAPITALIZATION.between(1e9, 100e9)
 
-// In list
-StockField.SECTOR.isin(['Technology', 'Healthcare'])
+// In range
+StockField.PRICE_TO_EARNINGS_RATIO_TTM.between(10, 20)
 ```
 
 ### Query Building
@@ -282,18 +282,11 @@ screener.where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.between(10, 20));
 ### List Filtering
 
 ```typescript
-// Specific sectors
-screener.where(StockField.SECTOR.isin([
-  'Technology',
-  'Healthcare',
-  'Consumer Cyclical'
-]));
+// Using text match for name patterns
+screener.where(StockField.NAME.match('Tech.*'));
 
-// Exclude sectors
-screener.where(StockField.SECTOR.notIn([
-  'Financial',
-  'Real Estate'
-]));
+// Multiple name filters
+screener.where(StockField.DESCRIPTION.match('.*(software|cloud|semiconductor).*'));
 ```
 
 ### Pagination
@@ -314,17 +307,17 @@ const baseQuery = new StockScreener()
   .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
   .where(StockField.VOLUME.gte(100_000));
 
-// Variation 1: Tech stocks
-const techScreener = new StockScreener()
+// Variation 1: High P/E stocks
+const growthScreener = new StockScreener()
   .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
   .where(StockField.VOLUME.gte(100_000))
-  .where(StockField.SECTOR.eq('Technology'));
+  .where(StockField.PRICE_TO_EARNINGS_RATIO_TTM.gt(25));
 
-// Variation 2: Healthcare stocks
-const healthScreener = new StockScreener()
+// Variation 2: High dividend yield stocks
+const dividendScreener = new StockScreener()
   .where(StockField.MARKET_CAPITALIZATION.gt(1e9))
   .where(StockField.VOLUME.gte(100_000))
-  .where(StockField.SECTOR.eq('Healthcare'));
+  .where(StockField.DIVIDEND_YIELD_FWD.gt(3));
 ```
 
 ## Type Safety
@@ -348,11 +341,11 @@ results.data[0].  // <-- IDE knows available properties
 ```typescript
 // ✓ Valid
 StockField.PRICE.gt(100);
-StockField.SECTOR.eq('Technology');
+StockField.NAME.match('Apple.*');
 
 // ✗ Type error
 StockField.PRICE.gt('high');     // Error: string not assignable to number
-StockField.SECTOR.gt(5);         // Error: number not valid for text field
+StockField.VOLUME.match('.*');   // Error: match not valid for numeric field
 ```
 
 ## Error Handling

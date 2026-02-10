@@ -83,40 +83,37 @@ async function analyzePortfolio(
   const screener = new StockScreener();
 
   // Filter for specific symbols
-  screener.where(StockField.SYMBOL.isin(symbols));
+  screener.where(StockField.NAME.isin(symbols));
 
   // Select fields based on requested metrics
-  const fields = [];
+  const fields = [StockField.NAME, StockField.PRICE];
 
   if (metrics.includes('valuation')) {
     fields.push(
       StockField.PRICE_TO_EARNINGS_RATIO_TTM,
       StockField.PRICE_TO_BOOK_MRQ,
-      StockField.PRICE_TO_SALES_TTM
+      StockField.PRICE_SALES_CURRENT
     );
   }
 
   if (metrics.includes('growth')) {
     fields.push(
-      StockField.REVENUE_GROWTH_TTM,
-      StockField.EARNINGS_GROWTH_TTM,
-      StockField.EARNINGS_PER_SHARE_GROWTH_TTM
+      StockField.REVENUE_TTM_YOY_GROWTH,
+      StockField.EARNINGS_PER_SHARE_DILUTED_TTM
     );
   }
 
   if (metrics.includes('profitability')) {
     fields.push(
-      StockField.OPERATING_MARGIN_TTM,
-      StockField.NET_MARGIN_TTM,
-      StockField.RETURN_ON_EQUITY_TTM
+      StockField.NET_INCOME_TTM,
+      StockField.REVENUE_TTM
     );
   }
 
   if (metrics.includes('technical')) {
     fields.push(
       StockField.RSI,
-      StockField.MOVING_AVERAGE_50,
-      StockField.MOVING_AVERAGE_200
+      StockField.ATR
     );
   }
 
@@ -209,12 +206,13 @@ async function compareSectors(
   for (const sector of sectors) {
     const screener = new StockScreener();
 
-    screener.where(StockField.SECTOR.eq(sector));
+    // Note: SECTOR field filtering requires additional implementation
+    // This example shows metric selection only
 
     // Select appropriate field based on metric
     switch (metric) {
       case 'price_change':
-        screener.select(StockField.CHANGE_PERCENT.withInterval(period));
+        screener.select(StockField.CHANGE_PERCENT);
         break;
       case 'volume':
         screener.select(StockField.VOLUME);
@@ -337,7 +335,7 @@ async function createAlert(
 async function monitorAlert(alert: Alert): Promise<void> {
   const screener = new StockScreener();
 
-  screener.where(StockField.SYMBOL.eq(alert.symbol));
+  screener.where(StockField.NAME.eq(alert.symbol));
   screener.select(StockField[alert.condition.field]);
 
   for await (const data of screener.stream({ interval: 60000 })) {
@@ -572,15 +570,16 @@ async function analyzeCorrelation(
 ): Promise<any> {
   const priceData: Record<string, number[]> = {};
 
-  // Fetch historical data for each symbol
+  // Fetch price data for each symbol
   for (const symbol of symbols) {
     const screener = new StockScreener();
 
-    screener.where(StockField.SYMBOL.eq(symbol));
-    screener.select(StockField.PRICE.withHistory(30)); // 30 days
+    screener.where(StockField.NAME.eq(symbol));
+    screener.select(StockField.PRICE, StockField.CHANGE_PERCENT);
 
     const results = await screener.get();
-    priceData[symbol] = results.data[0]?.price_history || [];
+    // Note: Historical price data requires additional API implementation
+    priceData[symbol] = results.data.map(row => row.price || 0);
   }
 
   // Calculate correlation matrix

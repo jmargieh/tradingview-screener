@@ -104,7 +104,7 @@ Creates an "equal to" condition.
 
 **Example:**
 ```typescript
-StockField.SECTOR.eq('Technology')
+StockField.NAME.eq('Apple Inc.')
 StockField.PRICE.eq(100)
 ```
 
@@ -118,8 +118,8 @@ Creates a "not equal to" condition.
 
 **Example:**
 ```typescript
-StockField.COUNTRY.ne('CN')
-StockField.SECTOR.ne('Financial')
+StockField.NAME.ne('Apple Inc.')
+StockField.DESCRIPTION.notMatch('.*bank.*')
 ```
 
 ## Range Operators
@@ -163,8 +163,8 @@ Creates an "in list" condition.
 
 **Example:**
 ```typescript
-StockField.SECTOR.isin(['Technology', 'Healthcare', 'Consumer Cyclical'])
-StockField.SYMBOL.isin(['AAPL', 'GOOGL', 'MSFT'])
+StockField.NAME.isin(['Apple Inc.', 'Microsoft Corporation', 'Alphabet Inc.'])
+StockField.DESCRIPTION.match('.*technology.*')
 ```
 
 ### Not In List
@@ -177,8 +177,8 @@ Creates a "not in list" condition.
 
 **Example:**
 ```typescript
-StockField.COUNTRY.notIn(['CN', 'RU'])
-StockField.EXCHANGE.notIn(['OTC', 'PINK'])
+StockField.NAME.notIn(['Penny Stock Inc.', 'OTC Corp'])
+StockField.PRICE.notIn([0, 1])
 ```
 
 ## Text Operators
@@ -194,7 +194,7 @@ Creates a regex match condition.
 **Example:**
 ```typescript
 StockField.NAME.match('.*bank.*')
-StockField.INDUSTRY.match('.*Software.*')
+StockField.DESCRIPTION.match('.*Software.*')
 ```
 
 ### Not Match Pattern
@@ -222,7 +222,7 @@ For array fields, checks if any value is present.
 
 **Example:**
 ```typescript
-StockField.TAGS.has(['dividend', 'growth'])
+// Array field operations not available with current field set
 ```
 
 ### Has None Of
@@ -235,7 +235,7 @@ For array fields, checks that none of the values are present.
 
 **Example:**
 ```typescript
-StockField.TAGS.hasNoneOf(['penny', 'otc'])
+// Array field operations not available with current field set
 ```
 
 ## Cross-Field Operators
@@ -250,8 +250,9 @@ Compare this field to another field (greater than).
 
 **Example:**
 ```typescript
-StockField.PRICE.above(StockField.MOVING_AVERAGE_50)
-StockField.MOVING_AVERAGE_50.above(StockField.MOVING_AVERAGE_200)  // Golden cross
+// Cross-field comparisons require technical indicator fields
+// which are not available in the current field set
+StockField.PRICE.gt(100)  // Use standard comparison instead
 ```
 
 ### Below
@@ -264,7 +265,9 @@ Compare this field to another field (less than).
 
 **Example:**
 ```typescript
-StockField.PRICE.below(StockField.MOVING_AVERAGE_200)
+// Cross-field comparisons require technical indicator fields
+// which are not available in the current field set
+StockField.PRICE.lt(1000)  // Use standard comparison instead
 ```
 
 ### Near
@@ -277,7 +280,9 @@ Check if field is within tolerance of another field.
 
 **Example:**
 ```typescript
-StockField.PRICE.near(StockField.MOVING_AVERAGE_50, 0.02)  // Within 2%
+// Cross-field comparisons require technical indicator fields
+// which are not available in the current field set
+StockField.PRICE.between(99, 101)  // Use range comparison instead
 ```
 
 ### Crosses
@@ -290,7 +295,8 @@ Detects when this field crosses another field (either direction).
 
 **Example:**
 ```typescript
-StockField.PRICE.crosses(StockField.MOVING_AVERAGE_200)
+// Cross-field comparisons require technical indicator fields
+// which are not available in the current field set
 ```
 
 ### Crosses Above
@@ -303,7 +309,8 @@ Detects when this field crosses above another field.
 
 **Example:**
 ```typescript
-StockField.MACD_LEVEL.crossesAbove(StockField.MACD_SIGNAL)
+// Cross-field comparisons require technical indicator fields
+// which are not available in the current field set
 ```
 
 ### Crosses Below
@@ -316,7 +323,8 @@ Detects when this field crosses below another field.
 
 **Example:**
 ```typescript
-StockField.PRICE.crossesBelow(StockField.MOVING_AVERAGE_50)
+// Cross-field comparisons require technical indicator fields
+// which are not available in the current field set
 ```
 
 ## Time Interval Modifiers
@@ -372,10 +380,10 @@ Search for fields by name or label.
 **Example:**
 ```typescript
 const fields = StockField.search('dividend');
-// Returns: DIVIDEND_YIELD_FWD, DIVIDEND_PAYOUT_RATIO_TTM, etc.
+// Returns: DIVIDEND_YIELD_FWD, DIVIDENDS_YIELD_FY, DPS_COMMON_STOCK_PRIM_ISSUE_TTM
 
 const priceFields = StockField.search('price');
-// Returns: PRICE, PRICE_TO_EARNINGS_RATIO_TTM, etc.
+// Returns: PRICE, PRICE_TO_EARNINGS_RATIO_TTM, PRICE_SALES_CURRENT, etc.
 ```
 
 ### By Format
@@ -403,7 +411,7 @@ Get all technical indicator fields.
 **Example:**
 ```typescript
 const indicators = StockField.technicals();
-// Returns: RSI, MACD, SMA, EMA, etc.
+// Returns: RSI, ATR, etc.
 ```
 
 ### Recommendations
@@ -416,8 +424,8 @@ Get all recommendation fields.
 
 **Example:**
 ```typescript
+// Recommendation fields are not available in the current field set
 const recs = StockField.recommendations();
-// Returns: RECOMMENDATION_ANALYST, RECOMMENDATION_OTHER, etc.
 ```
 
 ## FieldWithInterval Class
@@ -485,36 +493,37 @@ type FieldFormat =
 // Price & Volume
 StockField.PRICE
 StockField.VOLUME
-StockField.AVERAGE_VOLUME_10D
-StockField.RELATIVE_VOLUME_10D
+StockField.CHANGE
+StockField.CHANGE_PERCENT
 
 // Market Data
 StockField.MARKET_CAPITALIZATION
-StockField.CHANGE_PERCENT
-StockField.CHANGE_PERCENT_1W
-StockField.CHANGE_PERCENT_1M
+StockField.NAME
+StockField.DESCRIPTION
 
 // Valuation
 StockField.PRICE_TO_EARNINGS_RATIO_TTM
 StockField.PRICE_TO_BOOK_MRQ
-StockField.PRICE_TO_SALES_TTM
+StockField.PRICE_SALES_CURRENT
 StockField.ENTERPRISE_VALUE_EBITDA_TTM
+StockField.PRICE_EARNINGS_GROWTH_TTM
 
 // Dividends
 StockField.DIVIDEND_YIELD_FWD
-StockField.DIVIDEND_PAYOUT_RATIO_TTM
-StockField.DIVIDEND_GROWTH_RATE_5Y
+StockField.DIVIDENDS_YIELD_FY
+StockField.DPS_COMMON_STOCK_PRIM_ISSUE_TTM
+
+// Financial Performance
+StockField.REVENUE_TTM
+StockField.REVENUE_TTM_YOY_GROWTH
+StockField.NET_INCOME_TTM
+StockField.EARNINGS_PER_SHARE_DILUTED_TTM
 
 // Technical Indicators
 StockField.RSI
-StockField.MACD_LEVEL
-StockField.MACD_SIGNAL
-StockField.MOVING_AVERAGE_50
-StockField.MOVING_AVERAGE_200
-StockField.BOLLINGER_UPPER
-StockField.BOLLINGER_LOWER
+StockField.ATR
 
-// And 4,000+ more fields...
+// Total: 21 available fields
 ```
 
 ### Crypto Fields
@@ -522,11 +531,11 @@ StockField.BOLLINGER_LOWER
 ```typescript
 CryptoField.PRICE
 CryptoField.CHANGE_PERCENT
-CryptoField.MARKET_CAP
-CryptoField.VOLUME_24H_IN_USD
+CryptoField.MARKET_CAPITALIZATION
+CryptoField.VOLUME
 CryptoField.RSI
 
-// And 3,300+ more fields...
+// Note: Limited crypto fields available
 ```
 
 ## Best Practices
@@ -599,16 +608,19 @@ screener
 
 ```typescript
 screener
-  .where(StockField.SECTOR.isin(['Technology', 'Healthcare']))
-  .where(StockField.COUNTRY.notIn(['CN', 'RU']));
+  .where(StockField.NAME.match('.*Inc.*'))
+  .where(StockField.DESCRIPTION.notMatch('.*penny.*'));
 ```
 
 ### Cross-Field Comparison
 
 ```typescript
+// Cross-field comparisons require technical indicator fields
+// which are not available in the current field set
+// Use standard numeric comparisons instead:
 screener
-  .where(StockField.PRICE.above(StockField.MOVING_AVERAGE_50))
-  .where(StockField.MOVING_AVERAGE_50.above(StockField.MOVING_AVERAGE_200));
+  .where(StockField.PRICE.gt(100))
+  .where(StockField.RSI.lt(70));
 ```
 
 ### Time Intervals
@@ -623,7 +635,7 @@ screener
 
 ```typescript
 // Search for fields
-const fields = StockField.search('margin');
+const fields = StockField.search('revenue');
 fields.forEach(f => {
   console.log(`${f.name}: ${f.metadata.label}`);
 });
