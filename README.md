@@ -1,6 +1,6 @@
 # TradingView Screener API - TypeScript
 
-> Query stocks, crypto, forex, bonds, and futures from TradingView with 13,000+ fields
+> Query stocks, crypto, forex, bonds, and futures from TradingView
 
 TypeScript port of the [tvscreener](https://github.com/deepentropy/tvscreener/) Python library. Full-featured screener API with fluent methods, type safety, and MCP server support.
 
@@ -9,9 +9,8 @@ TypeScript port of the [tvscreener](https://github.com/deepentropy/tvscreener/) 
 ## Features
 
 - **6 Asset Types**: Stocks, Crypto, Forex, Bonds, Futures, Coins
-- **13,000+ Fields**: Fundamentals, technicals, ratios, recommendations
-- **Fluent API**: Chainable methods with TypeScript autocomplete
 - **Type Safe**: Full TypeScript support with strict typing
+- **Fluent API**: Chainable methods with TypeScript autocomplete
 - **Streaming**: Real-time data updates with async generators
 - **MCP Server**: Model Context Protocol integration for Claude
 - **Formatting**: Built-in beautification and number formatting
@@ -189,14 +188,14 @@ const coins = new CoinScreener();
 
 ## Field Categories
 
-### Stock Fields
+### Stock Fields (21 fields implemented)
 
-- **Price**: `PRICE`, `CHANGE`, `CHANGE_PERCENT`, `VOLUME`
-- **Fundamentals**: `REVENUE_TTM`, `NET_INCOME_TTM`, `EARNINGS_PER_SHARE_DILUTED_TTM`
-- **Valuation**: `MARKET_CAPITALIZATION`, `PRICE_TO_EARNINGS_RATIO_TTM`, `PRICE_TO_BOOK_MRQ`
-- **Dividends**: `DIVIDEND_YIELD_FWD`, `DIVIDENDS_PER_SHARE_FY`
-- **Technical**: `RSI`, `ATR`, `MACD`, `BOLLINGER_BANDS`
-- **Recommendations**: Analyst ratings and recommendations
+- **Price & Volume**: `PRICE`, `CHANGE`, `CHANGE_PERCENT`, `VOLUME`
+- **Information**: `NAME`, `DESCRIPTION`
+- **Valuation**: `MARKET_CAPITALIZATION`, `PRICE_TO_EARNINGS_RATIO_TTM`, `PRICE_EARNINGS_GROWTH_TTM`, `PRICE_SALES_CURRENT`, `PRICE_TO_BOOK_MRQ`, `ENTERPRISE_VALUE_EBITDA_TTM`
+- **Fundamentals**: `REVENUE_TTM`, `REVENUE_TTM_YOY_GROWTH`, `NET_INCOME_TTM`, `EARNINGS_PER_SHARE_DILUTED_TTM`
+- **Dividends**: `DIVIDEND_YIELD_FWD`, `DIVIDENDS_YIELD_FY`, `DPS_COMMON_STOCK_PRIM_ISSUE_TTM`
+- **Technical**: `RSI`, `ATR`
 
 ### Crypto Fields
 

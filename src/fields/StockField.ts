@@ -72,6 +72,22 @@ export const StockField = {
     historical: false,
   }),
 
+  PRICE_EARNINGS_GROWTH_TTM: new BaseField('PRICE_EARNINGS_GROWTH_TTM', {
+    label: 'PEG Ratio (TTM)',
+    fieldName: 'price_earnings_growth_ttm',
+    format: 'round',
+    interval: false,
+    historical: false,
+  }),
+
+  PRICE_SALES_CURRENT: new BaseField('PRICE_SALES_CURRENT', {
+    label: 'Price Sales Current',
+    fieldName: 'price_sales_current',
+    format: 'round',
+    interval: false,
+    historical: false,
+  }),
+
   PRICE_TO_BOOK_MRQ: new BaseField('PRICE_TO_BOOK_MRQ', {
     label: 'P/B Ratio',
     fieldName: 'price_book_fq',
@@ -96,6 +112,22 @@ export const StockField = {
     historical: false,
   }),
 
+  DIVIDENDS_YIELD_FY: new BaseField('DIVIDENDS_YIELD_FY', {
+    label: 'Dividends Yield FY',
+    fieldName: 'dividends_yield_fy',
+    format: 'percent',
+    interval: false,
+    historical: false,
+  }),
+
+  DPS_COMMON_STOCK_PRIM_ISSUE_TTM: new BaseField('DPS_COMMON_STOCK_PRIM_ISSUE_TTM', {
+    label: 'Dividend Per Share TTM',
+    fieldName: 'dps_common_stock_prim_issue_ttm',
+    format: 'currency',
+    interval: false,
+    historical: false,
+  }),
+
   EARNINGS_PER_SHARE_DILUTED_TTM: new BaseField('EARNINGS_PER_SHARE_DILUTED_TTM', {
     label: 'EPS Diluted (TTM)',
     fieldName: 'earnings_per_share_diluted_ttm',
@@ -108,6 +140,14 @@ export const StockField = {
     label: 'Revenue (TTM)',
     fieldName: 'total_revenue_ttm',
     format: 'currency',
+    interval: false,
+    historical: false,
+  }),
+
+  REVENUE_TTM_YOY_GROWTH: new BaseField('REVENUE_TTM_YOY_GROWTH', {
+    label: 'Revenue (TTM YoY Growth)',
+    fieldName: 'total_revenue_yoy_growth_ttm',
+    format: 'percent',
     interval: false,
     historical: false,
   }),
