@@ -5,6 +5,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - TBD
+
+### Added
+- **Complete field implementation**: 3,522 StockField constants providing full parity with Python tvscreener library
+- All major field categories now available:
+  - Price & Volume: 296 fields with 9 timeframe intervals (1m, 5m, 15m, 30m, 1h, 2h, 4h, 1D, 1W, 1M)
+  - Technical Indicators: 1,803 fields including:
+    - Moving Averages: 674 fields (SMA, EMA, VWMA)
+    - RSI variations: 248 fields across all timeframes
+    - MACD: 30 fields (MACD, Signal, Histogram)
+    - Bollinger Bands: 49 fields (Upper, Lower, Basis)
+    - Stochastic: 200 fields (K, D, RSI variations)
+    - ADX: 247 fields (+DI, -DI variations)
+    - Ichimoku: 89 fields (Base, Conversion, Lead lines)
+  - Candlestick Patterns: 260 fields (27 patterns × ~10 timeframes)
+  - Fundamentals: 480 fields (Earnings, Revenue, Cash Flow, Balance Sheet, Ratios, Dividends)
+  - Performance Metrics: 193 fields (historical price changes)
+  - Recommendations: 57 fields (analyst ratings, technical recommendations)
+  - Pivot Points: 213 fields
+  - Other indicators: 277 fields
+- Added 'missing' format type to support all field types from Python library
+
+### Changed
+- **MAJOR UPDATE**: StockField.ts completely rewritten with all 3,522 fields organized into 22 logical categories
+- README.md: Updated to reflect complete 3,522 field implementation
+- Documentation comprehensively updated:
+  - `docs/fields/stock-fields.md`: Complete field reference with categories, intervals, and usage examples
+  - `docs/screeners/stock.md`: Updated with multi-timeframe analysis and candlestick patterns
+  - `docs/examples/value-investing.md`: Enhanced with ROE, ROA, ROIC, margins, and cash flow metrics
+  - `docs/examples/growth-stocks.md`: Added profitability and efficiency metrics
+  - `docs/examples/dividend-investing.md`: Added payout ratios and dividend growth tracking
+  - `docs/examples/technical-analysis.md`: Expanded with RSI, MACD, Bollinger Bands, Stochastic, ADX
+
+### Breaking Changes
+- None - this is a pure addition. All existing 21 fields remain unchanged and backward compatible
+
+### Technical Details
+- Total fields: 3,522 (from 21)
+- Format types: 12 (added: missing, recommendation, rating, computed_recommendation)
+- Interval support: 2,518 fields (71.5%)
+- Historical data support: 9 fields (technical indicators only)
+- File size: src/fields/StockField.ts now 675 KB, 28,244 lines
+- All fields sourced from: https://github.com/deepentropy/tvscreener/blob/main/tvscreener/field/stock.py
+
 ## [1.1.0] - 10-02-2026
 
 ### Added
