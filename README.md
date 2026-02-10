@@ -316,6 +316,30 @@ npm run type-check
 npm run codegen:generate
 ```
 
+## Release Process
+
+To create a new release:
+
+```bash
+# Patch release (1.1.0 -> 1.1.1)
+./scripts/release.sh patch
+
+# Minor release (1.1.0 -> 1.2.0)
+./scripts/release.sh minor
+
+# Major release (1.1.0 -> 2.0.0)
+./scripts/release.sh major
+```
+
+The script will:
+1. Update package.json version
+2. Create a version bump commit
+3. Tag the release
+4. Push to GitHub
+5. Trigger automated release workflow
+
+See [scripts/README.md](scripts/README.md) for details.
+
 ## Documentation
 
 📚 **[View Complete Documentation](docs/README.md)**
