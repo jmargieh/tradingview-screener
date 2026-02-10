@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - TBD
+
+### Added
+- **Complete ForexField implementation**: 2,965 field constants providing full parity with Python tvscreener library
+- All major forex field categories now available:
+  - Price & Volume: 280 fields with OHLC data and spreads
+  - Moving Averages: 824 fields (SMA, EMA, HMA, VWMA, WMA)
+  - Oscillators: 480 fields (RSI, MACD, Stochastic, CCI, Williams %R)
+  - Volatility: 113 fields (ATR, Bollinger Bands, Keltner Channels, Donchian)
+  - Momentum: 290 fields (ADX, Momentum, ROC, Awesome Oscillator, Aroon)
+  - Candlestick Patterns: 151 fields
+  - Pivot Points: 310 fields (Classic, Fibonacci, Woodie, Camarilla, DeMark)
+  - Volume Indicators: 146 fields (VWAP, Money Flow, OBV, Volume Oscillator)
+  - Market Data: 20 fields (Recommendations, market info)
+  - Other: 317 fields (Additional technical indicators)
+
+### Changed
+- **MAJOR UPDATE**: ForexField.ts completely rewritten with all 2,965 fields organized into 11 logical categories
+- README.md: Updated forex section to reflect complete 2,965 field implementation
+- Documentation comprehensively updated:
+  - Created `docs/fields/forex-fields.md`: Complete field reference with all categories and usage examples
+  - `docs/screeners/forex.md`: Updated with complete field coverage, multi-timeframe analysis, and 7 use cases
+  - README: Added comprehensive Forex Fields section documenting all categories
+
+### Breaking Changes
+- None - this is a pure addition. All existing 3 ForexField constants remain unchanged and backward compatible
+
+### Technical Details
+- Total forex fields: 2,965 (from 3)
+- Format types: 11 (float, bool, percent, rating, number_group, date, computed_recommendation, text, round, recommendation, missing)
+- Interval support: 2,662 fields (89.8%)
+- Historical data support: 829 fields (28.0%)
+- File size: src/fields/ForexField.ts now 539 KB, 23,768 lines
+- All fields sourced from: https://github.com/deepentropy/tvscreener/blob/main/tvscreener/field/forex.py
+
 ## [2.1.0] - TBD
 
 ### Added
