@@ -88,7 +88,7 @@ describe('CryptoScreener Integration', () => {
     expect(payload.filter).toHaveLength(2);
     expect(payload.filter[0].left).toBe('close');
     expect(payload.filter[0].operation).toBe('greater');
-    expect(payload.filter[1].left).toBe('Value.Traded');
+    expect(payload.filter[1].left).toBe('24h_vol|5');
     expect(payload.filter[1].operation).toBe('egreater');
   });
 
@@ -109,7 +109,7 @@ describe('CryptoScreener Integration', () => {
 
     const [, payload] = mockPost.mock.calls[0];
 
-    expect(payload.filter[0].left).toBe('market_cap_calc');
+    expect(payload.filter[0].left).toBe('market_cap');
     expect(payload.filter[0].operation).toBe('in_range');
     expect(payload.filter[0].right).toEqual([1e9, 100e9]);
   });
@@ -130,7 +130,7 @@ describe('CryptoScreener Integration', () => {
     const [, payload] = mockPost.mock.calls[0];
 
     expect(payload.sort).toBeDefined();
-    expect(payload.sort.sortBy).toBe('Value.Traded');
+    expect(payload.sort.sortBy).toBe('24h_vol|5');
     expect(payload.sort.sortOrder).toBe('desc');
   });
 
@@ -151,7 +151,7 @@ describe('CryptoScreener Integration', () => {
 
     const [, payload] = mockPost.mock.calls[0];
 
-    expect(payload.sort.sortBy).toBe('market_cap_calc');
+    expect(payload.sort.sortBy).toBe('market_cap');
     expect(payload.sort.sortOrder).toBe('desc');
   });
 });
