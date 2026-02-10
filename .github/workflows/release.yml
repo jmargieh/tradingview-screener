@@ -107,7 +107,12 @@ jobs:
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Create tarball
+        run: |
+          tar -czf tradingview-screener-${{ needs.validate.outputs.version }}.tar.gz -C dist .
+
       - name: Create GitHub Release
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -124,7 +129,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist
+          asset_path: ./tradingview-screener-${{ needs.validate.outputs.version }}.tar.gz
           asset_name: tradingview-screener-${{ needs.validate.outputs.version }}.tar.gz
           asset_content_type: application/gzip
 
