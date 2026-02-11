@@ -461,7 +461,6 @@ Once configured, you can ask Claude natural language questions:
 
 "Show me cryptocurrencies with 24h volume over $100M that gained more than 10% today"
 
-
 "Find dividend stocks in healthcare sector with yield over 4%"
 
 "Screen for growth stocks with revenue growth over 30%"
@@ -674,9 +673,6 @@ npm run test:coverage
 
 # Type check
 npm run type-check
-
-# Generate field definitions (for contributors)
-npm run codegen:generate
 ```
 
 ### Running Examples
