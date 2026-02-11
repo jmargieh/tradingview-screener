@@ -5,6 +5,59 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-02-11
+
+### Added
+- **Complete CoinField implementation**: 3,026 field constants providing full parity with Python tvscreener library
+- All major coin field categories now available:
+  - 24-hour metrics: Volume, price changes across multiple timeframes
+  - Technical Indicators: 2,674 fields (ADX, RSI, MACD, Moving Averages, ATR, Momentum, etc.)
+  - Moving Averages: Multiple periods (EMA, SMA, VWMA, HMA)
+  - Candlestick Patterns: 270 fields (Doji, Hammer, Engulfing, Harami, etc.)
+  - Oscillators: 841 fields (RSI, Stochastic, CCI, Williams %R, etc.)
+  - Bollinger Bands, Ichimoku, Pivot Points
+  - Multiple timeframes: |1, |5, |15, |30, |60, |120, |240, |1D, |1W, |1M
+- **Complete FuturesField implementation**: 393 field constants providing full parity with Python tvscreener library
+- All major futures field categories now available:
+  - Price data (Open, High, Low, Close)
+  - Technical indicators (ADX, RSI, MACD, Moving Averages)
+  - Candlestick patterns (Doji, Hammer, Engulfing, etc.)
+  - Pivot points (Camarilla, Classic, Demark, Fibonacci, Woodie)
+  - Performance metrics and volume indicators
+  - Multiple timeframes support
+
+### Changed
+- **MAJOR UPDATE**: CoinField.ts completely rewritten with all 3,026 fields
+  - Previous implementation: 2 fields (NAME, PRICE)
+  - New implementation: 3,026 fields sourced from Python tvscreener
+  - Field breakdown: 2,379 float, 270 bool, 126 percent, 100 rating, 82 number_group, 55 date, 14 text
+- **MAJOR UPDATE**: FuturesField.ts completely rewritten with all 393 fields
+  - Previous implementation: 2 fields (NAME, PRICE)
+  - New implementation: 393 fields sourced from Python tvscreener
+  - Field breakdown: 279 float, 30 percent, 27 bool, 26 date, 15 text, 10 rating, 6 number_group
+- **CoinScreener**: Changed default field from `PRICE` to `CLOSE` (matching Python implementation)
+- **FuturesScreener**: Changed default field from `PRICE` to `CLOSE` (matching Python implementation)
+- **MCP Server**: Migrated from deprecated `Server` to `McpServer` class
+  - Updated import to use `@modelcontextprotocol/sdk/server/mcp.js`
+  - Now uses `McpServer` with access to underlying `server` property for advanced request handling
+  - Maintains backward compatibility with existing tool handlers
+- README.md: Updated field counts to reflect coin (3,026) and futures (393) implementations
+
+### Fixed
+- CoinField and FuturesField now use correct field names matching Python tvscreener
+- All coin and futures fields properly typed with correct formats
+- Documentation accurately reflects implemented field counts
+
+### Breaking Changes
+- `CoinField.PRICE` removed - use `CoinField.CLOSE` instead
+- `FuturesField.PRICE` removed - use `FuturesField.CLOSE` instead
+
+### Technical Details
+- **CoinField**: 3,026 fields, 24,235 lines, sourced from https://github.com/deepentropy/tvscreener/blob/main/tvscreener/field/coin.py
+- **FuturesField**: 393 fields, 3,179 lines, sourced from https://github.com/deepentropy/tvscreener/blob/main/tvscreener/field/futures.py
+- Total library fields: 13,000+ (3,522 stock + 3,026 coin + 2,965 forex + 3,108 crypto + 393 futures)
+- All fields validated against official Python implementation - no invented fields
+
 ## [2.2.1] - 2026-02-10
 ### Updated
 - **Documentation**: Improve readability README.md.

@@ -34,7 +34,7 @@ const stocks = await new StockScreener()
 ```
 
 **Key Features:**
-- **13,000+ Data Fields** — 3,522 stock, 3,108 crypto, 2,965 forex fields with complete parity to Python tvscreener
+- **13,000+ Data Fields** — 3,522 stock, 3,026 coin, 2,965 forex, 393 futures fields with complete parity to Python tvscreener
 - **6 Asset Types** — Stocks, crypto, forex, bonds, futures, coins
 - **Type Safety** — Full TypeScript support with IntelliSense autocomplete
 - **Fluent API** — Chainable methods that read like natural language
@@ -59,7 +59,6 @@ const stocks = await new StockScreener()
 - [MCP Server (Claude Integration)](#mcp-server-claude-desktop-integration)
 - [Available Asset Types](#available-screener-types)
 - [API Overview](#api-overview)
-- [Field Reference](#field-categories)
 - [Documentation](#documentation)
 - [Contributing](#development)
 - [License](#license)
@@ -411,217 +410,6 @@ Each screener provides access to thousands of data fields specific to its asset 
 
 ---
 
----
-
-## Field Categories
-
-This library provides **complete field parity** with the Python tvscreener library. Browse by asset type:
-
-### 📈 Stock Fields (3,522 fields)
-
-<details>
-<summary><strong>Core Information & Pricing</strong></summary>
-
-- **Identification:** `NAME`, `DESCRIPTION`, `SECTOR`, `COUNTRY`, `ACTIVE_SYMBOL`, `EXCHANGE`
-- **Price & Volume:** `PRICE`, `CHANGE`, `CHANGE_PERCENT`, `VOLUME`, `VOLUME_CHANGE`, `RELATIVE_VOLUME`
-- **Market Data:** `HIGH`, `LOW`, `OPEN`, `CLOSE`, `WEEK_HIGH_52`, `WEEK_LOW_52`
-- **Market Cap:** `MARKET_CAPITALIZATION`, `MARKET_CAP_CALC`
-
-</details>
-
-<details>
-<summary><strong>Valuation Metrics</strong></summary>
-
-- **Price Ratios:** `PRICE_TO_EARNINGS_RATIO_TTM`, `PRICE_EARNINGS_GROWTH_TTM`, `PRICE_SALES_CURRENT`, `PRICE_TO_BOOK_MRQ`, `PRICE_TO_BOOK_FY`
-- **Enterprise Value:** `ENTERPRISE_VALUE_EBITDA_CURRENT`, `ENTERPRISE_VALUEEBITDA_TTM`
-
-</details>
-
-<details>
-<summary><strong>Fundamental Metrics</strong></summary>
-
-- **Revenue:** `REVENUE_TTM_YOY_GROWTH`, `REVENUE_FQ`, `REVENUE_PER_SHARE_FY`, `REVENUE_PER_SHARE_TTM`
-- **Earnings:** `NET_INCOME_TTM`, `EARNINGS_PER_SHARE_DILUTED_FQ`, `EBITDA_FY`, `EBITDA_TTM`
-- **Balance Sheet:** `TOTAL_ASSETS_FY`, `TOTAL_DEBT_FY`, `CASH_AND_EQUIVALENTS_FY`, `BOOK_VALUE_PER_SHARE_FY`
-- **Cash Flow:** `CASH_F_OPERATING_ACTIVITIES_TTM`, `CASH_F_INVESTING_ACTIVITIES_TTM`, `CASH_F_FINANCING_ACTIVITIES_TTM`
-
-</details>
-
-<details>
-<summary><strong>Dividends</strong></summary>
-
-- **Yield:** `DIVIDEND_YIELD_FORWARD`, `DIVIDENDS_YIELD_FY`, `DIVIDENDS_YIELD_CURRENT`
-- **Payments:** `DIVIDEND_AMOUNT_RECENT`, `DIVIDENDS_PER_SHARE_FY`, `DPS_COMMON_STOCK_PRIM_ISSUE_TTM`
-- **Dates:** `DIVIDEND_EX_DATE_RECENT`, `DIVIDEND_PAYMENT_DATE_RECENT`
-
-</details>
-
-<details>
-<summary><strong>Financial Ratios</strong></summary>
-
-- **Profitability:** `RETURN_ON_EQUITY_FY`, `RETURN_ON_ASSETS_FY`, `GROSS_MARGIN_FY`, `OPERATING_MARGIN_FY`, `NET_MARGIN_FY`
-- **Leverage:** `DEBT_TO_EQUITY_FY`, `DEBT_TO_ASSETS`, `CURRENT_RATIO_FQ`, `QUICK_RATIO_FQ`
-- **Efficiency:** `ASSET_TURNOVER_FY`, `RECEIVABLES_TURNOVER_FY`, `INVENTORY_TURNOVER_FY`
-
-</details>
-
-<details>
-<summary><strong>Technical Indicators (100+ indicators)</strong></summary>
-
-- **Momentum:** `RSI` (multiple periods), `MOM`, `AO` (Awesome Oscillator), `STOCH_K`, `STOCH_D`
-- **Volatility:** `ATR`, `ATRP`, `BB_UPPER`, `BB_LOWER`, `BB_BASIS` (Bollinger Bands)
-- **Trend:** `ADX`, `ADX_PLUS_DI`, `ADX_MINUS_DI`, `SMA` (periods 3-300), `EMA` (periods 5-200)
-- **Volume:** `AVERAGE_VOLUME`, `RELATIVE_VOLUME`, `VOLUME_WEIGHTED_AVERAGE_PRICE`, `OBV`
-- **Oscillators:** `MACD_LEVEL`, `MACD_MACD`, `MACD_SIGNAL`, `MACD_HIST`, `CCI20`, `W_R`
-- **Ichimoku:** `ICHIMOKU_BASE_LINE`, `ICHIMOKU_BLINE`, `ICHIMOKU_CLINE`, `ICHIMOKU_LEAD1`, `ICHIMOKU_LEAD2`
-
-</details>
-
----
-
-### 🪙 Crypto Fields (3,108 fields)
-
-<details>
-<summary><strong>Core Price & Market Data</strong></summary>
-
-- **Price:** `PRICE`, `CHANGE`, `CHANGE_PERCENT`, `CHANGE_FROM_OPEN`, `CHANGE_FROM_OPEN_PERCENT`
-- **Volume:** `VOLUME_24H_IN_USD`, `VOLUME_24H_CHANGE_PERCENT`, `AVERAGE_VOLUME_10D_CALC_USD`, `AVERAGE_VOLUME_30D_CALC_USD`
-- **Market Cap:** `MARKET_CAP`, `MARKET_CAPITALIZATION`, `FULLY_DILUTED_MARKET_CAP`, `MARKET_CAP_TO_TVL`
-- **Supply:** `CIRCULATING_SUPPLY`, `TOTAL_SUPPLY`, `CIRCULATING_TO_MAX_SUPPLY_RATIO`
-- **Price Ranges:** `WEEK_HIGH_52`, `WEEK_LOW_52`, `ALL_TIME_HIGH`, `ALL_TIME_LOW`, `MONTH_HIGH_1`, `MONTH_LOW_1`
-
-</details>
-
-<details>
-<summary><strong>Blockchain Metrics</strong></summary>
-
-- **Addresses:** `ADDRESSES_ACTIVE`, `ADDRESSES_NEW`, `ADDRESSES_TOTAL`, `ADDRESSES_ZERO_BALANCE`, `ACTIVE_ADDRESSES_RATIO`
-- **Transactions:** `AVERAGE_TRANSACTION_USD`
-- **Holders:** `AT_THE_MONEY_ADDRESSES_PERCENTAGE`, `BREAK_EVEN_ADDRESSES_PERCENTAGE`, `IN_THE_MONEY_ADDRESSES_PERCENTAGE`
-- **Balance:** `AVG_BALANCE`
-
-</details>
-
-<details>
-<summary><strong>DeFi & DEX Data</strong></summary>
-
-- **DEX Volume:** `DEX_TRADING_VOLUME_24H`, `DEX_TRADING_VOLUME_12H`, `DEX_TRADING_VOLUME_4H`, `DEX_TRADING_VOLUME_1H`
-- **DEX Trades:** `DEX_BUY_VOLUME_24H`, `DEX_BUY_VOLUME_12H`, `DEX_SELL_VOLUME_24H`, `DEX_SELL_VOLUME_12H`
-- **Liquidity:** `TVL`, `MARKET_CAP_TO_TVL`
-
-</details>
-
-<details>
-<summary><strong>Technical Indicators</strong></summary>
-
-- **Momentum:** `RSI`, `MOMENTUM_10`, `AWESOME_OSCILLATOR`, `STOCH_RSI_K`, `STOCH_RSI_D`
-- **Volatility:** `ATR`, `ATRP`, `BB_UPPER`, `BB_LOWER`, `BB_BASIS`, `AVERAGE_DAY_RANGE_14`
-- **Trend:** `ADX`, `SMA`, `EMA`, `MACD_LEVEL`, `MACD_MACD`, `MACD_SIGNAL`
-- **Patterns:** `CANDLE_DOJI`, `CANDLE_HAMMER`, `CANDLE_SHOOTINGSTAR`, `CANDLE_ENGULFING_BULLISH`, `CANDLE_ENGULFING_BEARISH`
-
-</details>
-
-<details>
-<summary><strong>Performance Metrics</strong></summary>
-
-- **Historical Performance:** `MONTHLY_PERFORMANCE`, `MONTH_PERFORMANCE_3`, `MONTH_PERFORMANCE_6`, `YEARLY_PERFORMANCE`, `Y_PERFORMANCE_5`, `ALL_TIME_PERFORMANCE`, `YTD_PERFORMANCE`
-- **Change Metrics:** Multiple time intervals (1m, 5m, 15m, 30m, 1h, 2h, 4h, 1D, 1W, 1M) for price changes
-
-</details>
-
----
-
-### 💱 Forex Fields (2,965 fields)
-
-<details>
-<summary><strong>Core Price & Market Data</strong></summary>
-
-- **Price:** `PRICE`, `CHANGE`, `CHANGE_PERCENT`, `CHANGE_FROM_OPEN`, `CHANGE_FROM_OPEN_PERCENT`
-- **OHLC:** `OPEN`, `HIGH`, `LOW`, `CLOSE`, `HIGH_LOW_PERCENT`
-- **Volume:** `VOLUME`, `VOLUME_CHANGE`, `RELATIVE_VOLUME`, `AVERAGE_VOLUME_10D`, `AVERAGE_VOLUME_30D`
-- **Spread:** `BID`, `ASK`, `SPREAD_PERCENT`
-
-</details>
-
-<details>
-<summary><strong>Moving Averages (824 fields)</strong></summary>
-
-- **Simple:** `SMA` (periods 3-300 with multiple intervals)
-- **Exponential:** `EMA` (periods 5-200 with multiple intervals)
-- **Specialized:** `HMA`, `VWMA`, `WMA` (Hull, Volume-Weighted, Weighted Moving Averages)
-
-</details>
-
-<details>
-<summary><strong>Oscillators (480 fields)</strong></summary>
-
-- **RSI:** `RSI` (periods 2-30 with intervals), `STOCH_RSI_K`, `STOCH_RSI_D`
-- **MACD:** `MACD_LEVEL`, `MACD_MACD`, `MACD_SIGNAL`, `MACD_HIST`
-- **Stochastic:** `STOCH_K`, `STOCH_D`
-- **Others:** `CCI20`, `CCI50`, `CCI100`, `W_R`, `UO` (Williams %R, Ultimate Oscillator)
-
-</details>
-
-<details>
-<summary><strong>Volatility Indicators (113 fields)</strong></summary>
-
-- **ATR:** `ATR`, `ATRP` (Average True Range)
-- **Bands/Channels:** `BB_UPPER`, `BB_LOWER`, `BB_BASIS` (Bollinger), `KLTCHNL_*` (Keltner), `DONCHIAN_CHANNELS_*`
-- **Deviation:** `STDEV`
-
-</details>
-
-<details>
-<summary><strong>Candlestick Patterns (151 fields)</strong></summary>
-
-- **Reversal:** `CANDLE_DOJI`, `CANDLE_HAMMER`, `CANDLE_SHOOTINGSTAR`, `CANDLE_HANGING_MAN`
-- **Engulfing:** `CANDLE_ENGULFING_BULLISH`, `CANDLE_ENGULFING_BEARISH`
-- **Star Patterns:** `CANDLE_MORNINGSTAR`, `CANDLE_EVENINGSTAR`, `CANDLE_MORNINGDOJISTAR`
-- **Others:** `CANDLE_HARAMI_*`, `CANDLE_ABANDONED_BABY_*`, `CANDLE_TRISTAR_*`
-
-</details>
-
-<details>
-<summary><strong>Pivot Points (310 fields)</strong></summary>
-
-- **Classic:** `PIVOT_M_CLASSIC_S1/S2/S3`, `PIVOT_M_CLASSIC_R1/R2/R3`
-- **Fibonacci:** `PIVOT_M_FIBONACCI_S1/S2/S3`, `PIVOT_M_FIBONACCI_R1/R2/R3`
-- **Woodie:** `PIVOT_M_WOODIE_*`
-- **Camarilla:** `PIVOT_M_CAMARILLA_S1/S2/S3/S4`, `PIVOT_M_CAMARILLA_R1/R2/R3/R4`
-- **DeMark:** `PIVOT_M_DEMARK_S1`, `PIVOT_M_DEMARK_R1`
-
-</details>
-
-<details>
-<summary><strong>Volume & Momentum Indicators</strong></summary>
-
-- **Volume:** `VOLUME_WEIGHTED_AVERAGE_PRICE`, `MONEY_FLOW_INDEX`, `CHAIKIN_MONEY_FLOW`, `OBV`
-- **Momentum:** `ADX`, `ADX_PLUS_DI`, `ADX_MINUS_DI`, `MOM`, `MOMENTUM_10`, `AO`, `ROC`, `AROON_UP`, `AROON_DOWN`
-
-</details>
-
-<details>
-<summary><strong>Ichimoku Cloud (371 fields)</strong></summary>
-
-- **Components:** `ICHIMOKU_BASE_LINE`, `ICHIMOKU_BLINE`, `ICHIMOKU_CLINE`, `ICHIMOKU_LEAD1`, `ICHIMOKU_LEAD2`
-- **Multiple parameter sets:** (9,26,52), (20,60,120), (30,90,180)
-- **Multiple intervals:** 1m, 5m, 15m, 30m, 1h, 2h, 4h, 1D, 1W, 1M
-
-</details>
-
----
-
-**Time Intervals & Historical Data**
-
-Most technical and price fields support:
-- **Time intervals:** `1`, `5`, `15`, `30`, `60`, `120`, `240` (minutes), `1D` (daily), `1W` (weekly), `1M` (monthly)
-- **Historical data:** Access previous values with `.withHistory(index)` for time-series analysis
-
-For the complete field reference, visit the **[📖 Full Documentation](https://jmargieh.github.io/tradingview-screener/)**.
-
----
-
----
 
 ## MCP Server (Claude Desktop Integration)
 
@@ -654,18 +442,17 @@ MCP allows AI assistants like Claude to connect to external tools and data sourc
    }
    ```
 
-3. **Restart Claude Desktop** to load the MCP server.
+5. **Restart Claude Desktop** to load the MCP server.
 
 ### Example Prompts
 
 Once configured, you can ask Claude natural language questions:
 
 ```
-"Find tech stocks with P/E ratio under 20 and market cap over $10B"
+"tech stocks with P/E ratio under 40 and market cap over $400B"
 
 "Show me cryptocurrencies with 24h volume over $100M that gained more than 10% today"
 
-"Which forex pairs have RSI between 30 and 40?"
 
 "Find dividend stocks in healthcare sector with yield over 4%"
 

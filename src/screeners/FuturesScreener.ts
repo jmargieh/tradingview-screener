@@ -7,7 +7,7 @@ export class FuturesScreener extends BaseScreener {
   protected url = 'https://scanner.tradingview.com/futures/scan';
   protected defaultFields: BaseField[] = [
     FuturesField.NAME,
-    FuturesField.PRICE,
+    FuturesField.CLOSE,
   ];
 
   override selectAll(): this {

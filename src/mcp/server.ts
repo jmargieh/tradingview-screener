@@ -3,7 +3,7 @@
  * Model Context Protocol integration for Claude
  */
 
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   ListToolsRequestSchema,
@@ -129,7 +129,7 @@ function applyFilter(screener: BaseScreener, field: BaseField, op: string, value
  * Create and configure MCP server
  */
 async function main() {
-  const server = new Server(
+  const mcpServer = new McpServer(
     {
       name: 'tradingview-screener',
       version: '2.0.0',
@@ -140,6 +140,9 @@ async function main() {
       },
     }
   );
+
+  // Access the underlying Server instance for advanced request handling
+  const server = mcpServer.server;
 
   // Register list tools handler
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -652,7 +655,7 @@ async function main() {
 
   // Start server
   const transport = new StdioServerTransport();
-  await server.connect(transport);
+  await mcpServer.connect(transport);
 
   console.error('TradingView Screener MCP server running');
 }

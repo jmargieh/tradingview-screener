@@ -7,7 +7,7 @@ export class CoinScreener extends BaseScreener {
   protected url = 'https://scanner.tradingview.com/coin/scan';
   protected defaultFields: BaseField[] = [
     CoinField.NAME,
-    CoinField.PRICE,
+    CoinField.CLOSE,
   ];
 
   override selectAll(): this {
