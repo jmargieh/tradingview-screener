@@ -34,9 +34,7 @@ const stocks = await new StockScreener()
 ```
 
 <p align="center">
-<video height="440" controls>
-  <source src="docs/mcp-video.mp4" type="video/mp4">
-</video>
+  <img alt="TradingView Screener API" width="1280" src="docs/mcp-in-action.gif" width="300"/>
 </p>
 
 **Key Features:**
