@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img alt="TradingView Screener API" height="300" src="docs/hero-image.png" width="300"/>
+  <img alt="TradingView Screener API" height="300" width="400" src="docs/hero-image.png" width="300"/>
 </p>
 
 ---
