@@ -33,6 +33,12 @@ const stocks = await new StockScreener()
   .get();
 ```
 
+<p align="center">
+<video height="440" controls>
+  <source src="docs/mcp-video.mp4" type="video/mp4">
+</video>
+</p>
+
 **Key Features:**
 - **13,000+ Data Fields** — 3,522 stock, 3,026 coin, 2,965 forex, 393 futures fields with complete parity to Python tvscreener
 - **6 Asset Types** — Stocks, crypto, forex, bonds, futures, coins
