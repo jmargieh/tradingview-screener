@@ -83,6 +83,14 @@ function formatAsMarkdownTable(results: any[], fields: BaseField[]): string {
 }
 
 /**
+ * Find similar field names using fuzzy matching
+ */
+function findSimilarFields(fieldMap: FieldMap, searchTerm: string, limit: number = 3): BaseField[] {
+  // Use existing BaseField.search functionality
+  return BaseField.search(fieldMap, searchTerm).slice(0, limit);
+}
+
+/**
  * Apply filter to screener based on operator and value
  */
 function applyFilter(screener: BaseScreener, field: BaseField, op: string, value: any): void {
@@ -149,7 +157,7 @@ async function main() {
     tools: [
       {
         name: 'discover_fields',
-        description: 'Search 3500+ available fields/indicators by keyword. Use this to find field names before using custom_query.',
+        description: 'Search 3500+ available fields/indicators by keyword. Use this BEFORE custom_query to find valid field names. Field names differ between asset types (stock, crypto, coin, etc.). Searches both field names and descriptions for matches.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -189,7 +197,7 @@ async function main() {
       },
       {
         name: 'custom_query',
-        description: 'Advanced query with any fields and custom filters. Most flexible tool for complex screening.',
+        description: 'Advanced query with any fields and custom filters. Most flexible tool for complex screening. IMPORTANT: Field names are CASE-SENSITIVE and vary by asset type. Different asset types have different available fields: Stock/Crypto/Forex use CHANGE_PERCENT (Coin uses CHANGE), Stock uses MARKET_CAPITALIZATION (Crypto/Coin use MARKET_CAP), Crypto uses VOLUME_24H_IN_USD (Coin uses N24H_VOL_5). Always use discover_fields first to find valid field names for your asset type.',
         inputSchema: {
           type: 'object',
           properties: {
@@ -422,7 +430,15 @@ async function main() {
           for (const filter of filters) {
             const field = fieldMap[filter.field];
             if (!field) {
-              throw new Error(`Unknown field: ${filter.field}`);
+              const suggestions = findSimilarFields(fieldMap, filter.field);
+              const suggestionText = suggestions.length > 0
+                ? `\n\nDid you mean one of these?\n${suggestions.map(f => `  - ${f.name}: ${f.label}`).join('\n')}`
+                : '';
+
+              throw new Error(
+                `Unknown field '${filter.field}' for asset type '${assetType}'.${suggestionText}\n\n` +
+                `Use discover_fields(asset_type="${assetType}", search_term="<keyword>") to search available fields.`
+              );
             }
             applyFilter(screener, field, filter.op, filter.value);
           }
@@ -435,13 +451,28 @@ async function main() {
           selectedFields = fieldNames.map(name => {
             const field = fieldMap[name];
             if (!field) {
-              throw new Error(`Unknown field: ${name}`);
+              const suggestions = findSimilarFields(fieldMap, name);
+              const suggestionText = suggestions.length > 0
+                ? `\n\nDid you mean one of these?\n${suggestions.map(f => `  - ${f.name}: ${f.label}`).join('\n')}`
+                : '';
+
+              throw new Error(
+                `Unknown field '${name}' for asset type '${assetType}'.${suggestionText}\n\n` +
+                `Use discover_fields(asset_type="${assetType}", search_term="<keyword>") to search available fields.`
+              );
             }
             return field;
           });
           screener.select(...selectedFields);
         } else {
-          selectedFields = [fieldMap.NAME, fieldMap.PRICE, fieldMap.CHANGE_PERCENT];
+          // Use fallback fields that work across asset types
+          const changeField = fieldMap.CHANGE_PERCENT || fieldMap.CHANGE;
+          const priceField = fieldMap.PRICE || fieldMap.CLOSE;
+          selectedFields = [fieldMap.NAME, priceField, changeField].filter(f => f !== undefined);
+
+          if (selectedFields.length === 0) {
+            throw new Error(`Asset type '${assetType}' has no compatible default fields`);
+          }
           screener.select(...selectedFields);
         }
 
@@ -449,7 +480,15 @@ async function main() {
         if (sortBy) {
           const sortField = fieldMap[sortBy];
           if (!sortField) {
-            throw new Error(`Unknown sort field: ${sortBy}`);
+            const suggestions = findSimilarFields(fieldMap, sortBy);
+            const suggestionText = suggestions.length > 0
+              ? `\n\nDid you mean one of these?\n${suggestions.map(f => `  - ${f.name}: ${f.label}`).join('\n')}`
+              : '';
+
+            throw new Error(
+              `Unknown sort field '${sortBy}' for asset type '${assetType}'.${suggestionText}\n\n` +
+              `Use discover_fields(asset_type="${assetType}", search_term="<keyword>") to search available fields.`
+            );
           }
           screener.sortBy(sortField, ascending);
         }
@@ -572,14 +611,20 @@ async function main() {
 
         const { screener, fields: fieldMap } = getScreenerAndFields(assetType);
 
-        const changeField = fieldMap.CHANGE_PERCENT;
+        // Use fallback for change field (coin uses CHANGE instead of CHANGE_PERCENT)
+        const changeField = fieldMap.CHANGE_PERCENT || fieldMap.CHANGE;
+        if (!changeField) {
+          throw new Error(`Asset type '${assetType}' does not support change percentage tracking`);
+        }
         screener.sortBy(changeField, direction === 'losers');
 
+        // Use fallback for price field
+        const priceField = fieldMap.PRICE || fieldMap.CLOSE;
         const selectedFields = [
           fieldMap.NAME,
-          fieldMap.PRICE,
-          fieldMap.CHANGE_PERCENT,
-        ];
+          priceField,
+          changeField,
+        ].filter(f => f !== undefined);
 
         screener.select(...selectedFields).setRange(0, limit);
 
@@ -641,11 +686,18 @@ async function main() {
 
       throw new Error(`Unknown tool: ${name}`);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      // Add helpful context for field-related errors
+      const enhancedMessage = errorMessage.includes('Unknown field')
+        ? errorMessage + '\n\nTip: Field names vary by asset type. Use discover_fields to search available fields.'
+        : errorMessage;
+
       return {
         content: [
           {
             type: 'text',
-            text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+            text: `Error: ${enhancedMessage}`,
           },
         ],
         isError: true,

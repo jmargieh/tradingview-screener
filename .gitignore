@@ -44,3 +44,8 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .pytest_cache/
+
+MCP_ENHANCEMENT_PROPOSALS.md
+medium_blog_v1.md
+medium_blog_v2.md
+medium_blog_v3.md

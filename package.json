@@ -1,6 +1,6 @@
 {
   "name": "tradingview-screener",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "TypeScript port of TradingView Screener API - query stocks, crypto, forex, bonds, futures with type-safe field access",
   "type": "module",
   "main": "./dist/index.js",
